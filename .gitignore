@@ -1,0 +1,11 @@
+# Executable
+main
+
+# Object files
+*.o
+src/**/*.o
+
+# Editor/OS
+.DS_Store
+.vscode/
+*.swp

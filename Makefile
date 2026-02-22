@@ -2,7 +2,7 @@
 CC = gcc
 
 # Compiler options
-CFLAGS = -Wall -Wextra -std=c++20 -I src/include
+CFLAGS = -Wall -Wextra -std=c17 -I src/include
 OFLAGS = -o
 
 # Directories
@@ -11,19 +11,11 @@ SUBDIRS = \
     backend
 
 # Executable
-TARGET = main.o
-
-# Dependencies and objects
-_DEPS = \
-    arlloc.c
+TARGET = main
 
 DEPS = \
     $(SRCDIR)/backend/dll.c \
-    $(SRCDIR)/backend/arlloc.c \
 	$(SRCDIR)/main.c
-
-INCLUDE = \
-	$(SRCDIR)/include
 
 # Main rule
 all: $(TARGET)
