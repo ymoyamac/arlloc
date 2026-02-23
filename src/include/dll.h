@@ -65,13 +65,14 @@ struct dll_s
 };
 
 Dll* make_list();
+void drop(Dll* self);
 //Dll* make_list(void* arr);
 void fmt(Dll* self);
 void* get_data_at(Dll* self, size_t index);
-void __push_front(Dll* self, void* data, DataTypes type);
 void __push_back(Dll* self, void* data, DataTypes type);
-void* pop_front(Dll* self);
+void __push_front(Dll* self, void* data, DataTypes type);
 void* pop_back(Dll* self);
+void* pop_front(Dll* self);
 
 
 #endif

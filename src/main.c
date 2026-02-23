@@ -29,5 +29,19 @@ int main() {
     char* word = (char*)get_data_at(list, 6);
     printf("Word: %s\n", word);
 
+
+    int tail = *(int*) pop_back(list);
+    printf("Tail: %d\n", tail);
+
+    fmt(list);
+
+    pop_front(list);
+    pop_front(list);
+    int head = *(int*) pop_front(list);
+    printf("Head: %d\n", head);
+
+    fmt(list);
+
+
     return 0;
 }
