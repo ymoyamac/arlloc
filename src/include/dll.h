@@ -21,42 +21,57 @@
         char*:  TYPE_STRING                         \
     ))
 
+#define push_front_auto(list, val) push_front(list, \
+    _Generic((val),                                 \
+        int:    &(val),                             \
+        float:  &(val),                             \
+        char:   &(val),                             \
+        char*:  (val)                               \
+    ),                                              \
+    _Generic((val),                                 \
+        int:    TYPE_INT,                           \
+        float:  TYPE_FLOAT,                         \
+        char:   TYPE_CHAR,                          \
+        char*:  TYPE_STRING                         \
+    ))
+
 typedef enum {
     TYPE_INT,
     TYPE_FLOAT,
     TYPE_CHAR,
     TYPE_STRING
-} data_type;
+} DataTypes;
 
-typedef struct node_s node;
+typedef struct node_s Node;
 
 struct node_s
 {
     void* data;
-    data_type type;
-    node* next;
-    node* prev;
+    DataTypes type;
+    Node* next;
+    Node* prev;
 };
 
-node* make_node(void* data, data_type type);
+Node* make_node(void* data, DataTypes type);
 
-typedef struct dll_s dll;
+typedef struct dll_s Dll;
 
 struct dll_s
 {
     size_t size;
     size_t capacity;
-    node* head;
-    node* tail;
+    Node* head;
+    Node* tail;
 };
 
-dll* make_list();
-void fmt(dll* self);
-void* get_data_at(dll* self, size_t index);
-void push_front(dll* self, void* data);
-void push_back(dll* self, void* data, data_type type);
-void* pop_front(dll* self);
-void* pop_back(dll* self);
+Dll* make_list();
+//Dll* make_list(void* arr);
+void fmt(Dll* self);
+void* get_data_at(Dll* self, size_t index);
+void push_front(Dll* self, void* data, DataTypes type);
+void push_back(Dll* self, void* data, DataTypes type);
+void* pop_front(Dll* self);
+void* pop_back(Dll* self);
 
 
 #endif

@@ -6,11 +6,11 @@
  * If `malloc` cannot allocate memory, it returns `NULL`.
  *
  * @param data  Pointer to the data to store in the node.
- * @param type  The data type of the stored value (`data_type` enum).
+ * @param type  The data type of the stored value (`DataTypes` enum).
  * @return      Pointer to the new node, or `NULL` if allocation fails.
  */
-node* make_node(void* data, data_type type) {
-    node* node_ptr = (node*)malloc(sizeof(node));
+Node* make_node(void* data, DataTypes type) {
+    Node* node_ptr = (Node*)malloc(sizeof(Node));
     if (node_ptr == NULL) {
         printf("Error allocating node...\n");
         return NULL;
@@ -41,8 +41,8 @@ node* make_node(void* data, data_type type) {
  *
  * @return  Pointer to the new list, or `NULL` if allocation fails.
  */
-dll* make_list() {
-    dll* list = (dll*)malloc(sizeof(dll));
+Dll* make_list() {
+    Dll* list = (Dll*)malloc(sizeof(Dll));
     if (list == NULL) {
         printf("Error to create list...\n");
         return NULL;
@@ -69,18 +69,18 @@ dll* make_list() {
 
 /**
  * Prints all elements of the list to stdout.
- * Each element is formatted according to its `data_type`.
+ * Each element is formatted according to its `DataTypes`.
  * Does nothing if `self` is `NULL`.
  *
  * @param self  Pointer to the list to print.
  */
-void fmt(dll* self) {
+void fmt(Dll* self) {
 
     if (self == NULL) {
         return;
     }
 
-    node* iter = self->head;
+    Node* iter = self->head;
     printf("List {");
     while (iter) {
         /**
@@ -118,12 +118,12 @@ void fmt(dll* self) {
  * @param index  Zero-based position to retrieve.
  * @return       Pointer to the data at `index`, or `NULL` if invalid.
  */
-void* get_data_at(dll* self, size_t index) {
+void* get_data_at(Dll* self, size_t index) {
     if (self == NULL || self->size == 0 || index > self->size) {
         return NULL;
     }
 
-    node* iter = self->head;
+    Node* iter = self->head;
     /**
      * The list is traversed until the given index is reached.
      *
@@ -146,11 +146,11 @@ void* get_data_at(dll* self, size_t index) {
  *
  * @param self  Pointer to the list.
  * @param data  Pointer to the data to store.
- * @param type  The data type of the stored value (`data_type` enum).
+ * @param type  The data type of the stored value (`DataTypes` enum).
  */
-void push_back(dll* self, void* data, data_type type) {
+void push_back(Dll* self, void* data, DataTypes type) {
     /** A new node is created with the data to be stored. */
-    node* new_node = make_node(data, type);
+    Node* new_node = make_node(data, type);
     if (new_node == NULL) {
         return;
     }
@@ -168,7 +168,6 @@ void push_back(dll* self, void* data, data_type type) {
         printf("List is empty...\n");
         self->head = new_node;
         self->tail = new_node;
-        self->size++;
     } else {
         /**
          * Case 2 - List has elements: the new node is linked after the current tail.
@@ -191,6 +190,26 @@ void push_back(dll* self, void* data, data_type type) {
         self->tail->next = new_node;
         new_node->prev = self->tail;
         self->tail = new_node;
-        self->size++;
     }
+    self->size++;
+}
+
+void push_front(Dll* self, void* data, DataTypes type) {
+    Node* new_node = make_node(data, type);
+
+    if (new_node == NULL) {
+        return;
+    }
+
+    if (self->head == NULL && self->tail == NULL) {
+        printf("Empty list...\n");
+        self->head = new_node;
+        self->tail = new_node;
+    } else {
+        printf("Allocating new item...\n");
+        new_node->next = self->head;
+        self->head = new_node;
+    }
+    self->size++;
+    
 }

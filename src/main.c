@@ -2,7 +2,7 @@
 
 int main() {
 
-    dll* list = make_list();
+    Dll* list = make_list();
 
     int numbers[] = {1, 2, 3, 4, 5, 6};
     char* words[] = {"hello", "world"};
@@ -15,6 +15,11 @@ int main() {
     {
         push_back_auto(list, words[i]);
     }
+
+    int num = 99;
+    push_front_auto(list, num);
+    push_front_auto(list, num);
+    push_back_auto(list, num);
 
     fmt(list);
 
