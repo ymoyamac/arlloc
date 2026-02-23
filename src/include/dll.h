@@ -7,7 +7,7 @@
 
 #define DEFAULT_CAPACITY 10
 
-#define push_back_auto(list, val) push_back(list,   \
+#define push_back(list, val) __push_back(list,      \
     _Generic((val),                                 \
         int:    &(val),                             \
         float:  &(val),                             \
@@ -21,7 +21,7 @@
         char*:  TYPE_STRING                         \
     ))
 
-#define push_front_auto(list, val) push_front(list, \
+#define push_front(list, val) __push_front(list,    \
     _Generic((val),                                 \
         int:    &(val),                             \
         float:  &(val),                             \
@@ -68,8 +68,8 @@ Dll* make_list();
 //Dll* make_list(void* arr);
 void fmt(Dll* self);
 void* get_data_at(Dll* self, size_t index);
-void push_front(Dll* self, void* data, DataTypes type);
-void push_back(Dll* self, void* data, DataTypes type);
+void __push_front(Dll* self, void* data, DataTypes type);
+void __push_back(Dll* self, void* data, DataTypes type);
 void* pop_front(Dll* self);
 void* pop_back(Dll* self);
 

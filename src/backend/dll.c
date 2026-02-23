@@ -148,7 +148,7 @@ void* get_data_at(Dll* self, size_t index) {
  * @param data  Pointer to the data to store.
  * @param type  The data type of the stored value (`DataTypes` enum).
  */
-void push_back(Dll* self, void* data, DataTypes type) {
+void __push_back(Dll* self, void* data, DataTypes type) {
     /** A new node is created with the data to be stored. */
     Node* new_node = make_node(data, type);
     if (new_node == NULL) {
@@ -194,7 +194,7 @@ void push_back(Dll* self, void* data, DataTypes type) {
     self->size++;
 }
 
-void push_front(Dll* self, void* data, DataTypes type) {
+void __push_front(Dll* self, void* data, DataTypes type) {
     Node* new_node = make_node(data, type);
 
     if (new_node == NULL) {
