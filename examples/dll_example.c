@@ -8,18 +8,18 @@ int main() {
     char* words[] = {"hello", "world"};
 
     for (size_t i = 0; i < len(numbers); i++) {
-        push_back(list, numbers[i]);
+        push_back_primitivies(list, numbers[i]);
     }
 
     for (size_t i = 0; i < len(words); i++)
     {
-        push_back(list, words[i]);
+        push_back_primitivies(list, words[i]);
     }
 
     int num = 99;
-    push_front(list, num);
-    push_front(list, num);
-    push_back(list, num);
+    push_front_primitives(list, num);
+    push_front_primitives(list, num);
+    push_back_primitivies(list, num);
 
     fmt(list);
 

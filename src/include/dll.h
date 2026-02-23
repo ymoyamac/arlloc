@@ -7,7 +7,7 @@
 
 #define DEFAULT_CAPACITY 10
 
-#define push_back(list, val) __push_back(list,      \
+#define push_back_primitivies(list, val) push_back(list,      \
     _Generic((val),                                 \
         int:    &(val),                             \
         float:  &(val),                             \
@@ -21,7 +21,7 @@
         char*:  TYPE_STRING                         \
     ))
 
-#define push_front(list, val) __push_front(list,    \
+#define push_front_primitives(list, val) push_front(list,    \
     _Generic((val),                                 \
         int:    &(val),                             \
         float:  &(val),                             \
@@ -39,7 +39,9 @@ typedef enum {
     TYPE_INT,
     TYPE_FLOAT,
     TYPE_CHAR,
-    TYPE_STRING
+    TYPE_STRING,
+    TYPE_ANY,
+    TYPE_BLOCK,
 } DataTypes;
 
 typedef struct node_s Node;
@@ -64,13 +66,12 @@ struct dll_s
     Node* tail;
 };
 
-Dll* make_list();
-Dll* make_list_from(void* arr);
+Dll* make_list(void);
 void drop(Dll* self);
 void fmt(Dll* self);
 void* get_data_at(Dll* self, size_t index);
-void __push_back(Dll* self, void* data, DataTypes type);
-void __push_front(Dll* self, void* data, DataTypes type);
+void push_back(Dll* self, void* data, DataTypes type);
+void push_front(Dll* self, void* data, DataTypes type);
 void* pop_back(Dll* self);
 void* pop_front(Dll* self);
 

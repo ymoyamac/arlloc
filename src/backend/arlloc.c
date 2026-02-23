@@ -1,76 +1,68 @@
 #include "arlloc.h"
 
-typedef struct block_s {
-    /**
-     * Region
-     *
-     *  16 bytes (metadata)           X bytes (available buffer)
-     * +--------------------------------------------------------------------+
-     * | size   (8 bytes)  |              Allocatable Buffer                |
-     * | next   (8 bytes)  |                                                |
-     * +--------------------------------------------------------------------+
-     */
-    size_t size;
-    Block* next;
-} Block;
+BumpArllocator* make_arllocator() {
+    BumpArllocator* arllocator = (BumpArllocator*)malloc(sizeof(BumpArllocator));
 
-
-typedef struct region_s {
-    /**
-     * Region
-     *
-     *  32 bytes (metadata)           4064 bytes (available buffer)
-     * +--------------------------------------------------------------------+
-     * | buffer (8 bytes)  |                                                |
-     * | size   (8 bytes)  |              Allocatable Buffer                |
-     * | offset (8 bytes)  |                                                |
-     * | next   (8 bytes)  |                                                |
-     * +--------------------------------------------------------------------+
-     * 
-     *                              Region
-     * +----------+----------------------------------------------------------+
-     * |          |  +-------+-----------+    +-------+-----------+          |
-     * |  Header  |  | Block |           | -> | Block |           | ->       |
-     * |          |  +-------+-----------+    +-------+-----------+          |
-     * +----------+----------------------------------------------------------+
-     * 
-     */
-    unsigned char* buffer;
-    size_t size;
-    size_t offset;
-    Region* next;
-} Region;
-
-Region* mem_region() {
-    Region* region = (Region*) mmap(NULL, PAGE_SIZE, PROT_RW, MAP_FLAGS, -1, 0);
-    if (region == MAP_FAILED) {
-        printf("Error: mmap failed\n");
+    if (arllocator == NULL) {
+        printf("Error to create BumpArllocator\n");
         return NULL;
     }
 
-    region->buffer = (unsigned char*)(region + 1);
-    region->size = PAGE_SIZE - sizeof(Region);
-    region->offset = 0;
-    region->next = NULL;
+    arllocator->size = 0;
+    arllocator->free_blocks = NULL;
+    arllocator->regions = NULL;
 
-    return region;
+    return arllocator;
 }
 
-void* alloc_into_region(Region* region, size_t size) {
-    if (region == NULL || size == 0) {
-        printf("Error: allocate memory failed\n");
+void* arlloc(size_t size_in_bytes) {
+    BumpArllocator* arlloc = make_arllocator();
+    Dll* regions = make_list();
+    /**
+     * Case 1: if the memory size of elements is greater than PAGE_SIZE
+     * 
+     * Example: 
+     *  arlloc(sizeof(int) * 2000) // 8000 bytes
+     *  
+     * crear regiones de memoria hasta que se cubra el espacio solicitado, es decir,
+     * tener dos regiones de memoria de 4064 con dos bloques internos de x bytes hasta
+     * cada una.
+     * 
+     *                 Region                                                       Region                         
+     * +----------+------------------------------+    +----------+---------------------------------------------------------+    
+     * |          |  +-------+----------------+  |    |          |  +-------+----------------+  +-------+---------------+  |    
+     * |  Header  |  | Block | is_free: false |  | -> |  Header  |  | Block | is_free: false |->| Block | is_free: true |  | -> 
+     * |          |  +-------+----------------+  |    |          |  +-------+----------------+  +-------+---------------+  |    
+     * +----------+------------------------------+    +----------+---------------------------------------------------------+    
+     */
+    if (size_in_bytes > PAGE_SIZE) {
         return NULL;
+    } else {
+        arlloc->regions = regions;
+        /**
+         * Case 2: is the memory size if less than PAGE_SIZE
+         * 
+         * Block
+         *
+         *  20 bytes (metadata)           X bytes (available buffer)
+         * +---------------------------------------------------------------------+
+         * | is_free (4 bytes)  |                                                |
+         * | size    (8 bytes)  |              Allocatable Buffer                |
+         * | next    (8 bytes)  |                                                |
+         * +---------------------------------------------------------------------+
+         * ^                    ^
+         * *block               *buffer
+         */
+        Region* region = make_region();
+        Block* buffer_region = (Block*)alloc_into_region(region, size_in_bytes);
+        buffer_region->is_free = false;
+        buffer_region->size = sizeof(Block) + size_in_bytes;
+        buffer_region->next_block = NULL;
+        fmtblock(buffer_region);
+        push_front(regions, buffer_region, TYPE_ANY);
+
+        return buffer_region + 1;
     }
-
-    u64 algined = ALIGN(region->offset, 8);
-
-    if (region->offset + size > region->size) {
-        printf("Error: Insufficient space\n");
-        return NULL;
-    }
-
-    void* ptr = region->buffer + region->offset;
-    region->offset = algined + size;
-    return ptr;
 
 }
+

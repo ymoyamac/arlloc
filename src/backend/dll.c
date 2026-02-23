@@ -67,39 +67,6 @@ Dll* make_list() {
     return list;
 }
 
-Dll* make_list_from(void* arr) {
-    Dll* list = (Dll*)malloc(sizeof(Dll));
-    if (list == NULL) {
-        printf("Error to create list...\n");
-        return NULL;
-    }
-
-    /**
-     * The list fields are initialized.
-     * head and tail are NULL because the list is empty.
-     *
-     *  dll
-     *  +----------+------+------+------+
-     *  | capacity | size | head | tail |
-     *  +----------+------+------+------+
-     *  |    10    |   0  | NULL | NULL |
-     *  +----------+------+------+------+
-     */
-    list->capacity = DEFAULT_CAPACITY;
-    list->size = 0;
-    list->head = NULL;
-    list->tail = NULL;
-
-    // size_t len = len(arr);
-    // for (size_t i = 0; i < len; i++)
-    // {
-        // push_back(list, arr[i]); -> No funciona
-    // }
-    
-
-    return list;
-}
-
 /**
  * Free all elements of the list.
  * Does nothing if `self` is `NULL`.
@@ -169,6 +136,7 @@ void fmt(Dll* self) {
             case TYPE_FLOAT:  printf("%f",  *(float*)iter->data); break;
             case TYPE_CHAR:   printf("%c",  *(char*)iter->data);  break;
             case TYPE_STRING: printf("%s",  (char*)iter->data);   break;
+            default: printf("%s", (char*)iter->data);   break;
         }
         if (iter->next != NULL) {
             printf(", ");
@@ -218,7 +186,7 @@ void* get_data_at(Dll* self, size_t index) {
  * @param data  Pointer to the data to store.
  * @param type  The data type of the stored value (`DataTypes` enum).
  */
-void __push_back(Dll* self, void* data, DataTypes type) {
+void push_back(Dll* self, void* data, DataTypes type) {
 
     if (self == NULL) {
         return;
@@ -276,7 +244,7 @@ void __push_back(Dll* self, void* data, DataTypes type) {
  * @param data  Pointer to the data to store.
  * @param type  The data type of the stored value (`DataTypes` enum).
  */
-void __push_front(Dll* self, void* data, DataTypes type) {
+void push_front(Dll* self, void* data, DataTypes type) {
 
     if (self == NULL) {
         return;

@@ -7,6 +7,9 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <sys/mman.h>
+#include <stdbool.h>
+
+#include "dll.h"
 
 typedef int32_t i32;
 typedef int64_t i64;

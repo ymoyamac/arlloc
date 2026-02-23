@@ -15,6 +15,9 @@ TARGET = main
 
 DEPS = \
     $(SRCDIR)/backend/dll.c \
+    $(SRCDIR)/backend/mem_block.c \
+    $(SRCDIR)/backend/mem_region.c \
+    $(SRCDIR)/backend/arlloc.c \
 	$(SRCDIR)/main.c
 
 # Main rule

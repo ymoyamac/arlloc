@@ -2,11 +2,19 @@
 #define ARLLOC_H
 
 #include "lib.h"
+#include "mem_block.h"
+#include "mem_region.h"
 
-typedef struct block_s Block;
-typedef struct region_s Region;
+typedef struct bump_arllocator_s BumpArllocator;
 
-Region* mem_region(void);
-void* alloc_into_region(Region* region, size_t size);
+struct bump_arllocator_s
+{
+    size_t size;
+    Dll* free_blocks;
+    Dll* regions;
+};
+
+BumpArllocator* make_arllocator(void);
+void* arlloc(size_t size_in_bytes);
 
 #endif
