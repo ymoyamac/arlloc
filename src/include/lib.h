@@ -3,6 +3,10 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <sys/mman.h>
 
 typedef int32_t i32;
 typedef int64_t i64;
