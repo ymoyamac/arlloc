@@ -67,6 +67,50 @@ Dll* make_list() {
     return list;
 }
 
+Dll* make_list_from(void* arr) {
+    Dll* list = (Dll*)malloc(sizeof(Dll));
+    if (list == NULL) {
+        printf("Error to create list...\n");
+        return NULL;
+    }
+
+    /**
+     * The list fields are initialized.
+     * head and tail are NULL because the list is empty.
+     *
+     *  dll
+     *  +----------+------+------+------+
+     *  | capacity | size | head | tail |
+     *  +----------+------+------+------+
+     *  |    10    |   0  | NULL | NULL |
+     *  +----------+------+------+------+
+     */
+    list->capacity = DEFAULT_CAPACITY;
+    list->size = 0;
+    list->head = NULL;
+    list->tail = NULL;
+
+    size_t len = len(arr);
+    for (size_t i = 0; i < len; i++)
+    {
+        // push_back(list, arr[i]); -> No funciona
+    }
+    
+
+    return list;
+}
+
+void drop(Dll* self) {
+    Node* iter = self->tail;
+    while (iter) {
+        free(iter->next);
+        iter = iter->prev;
+    }
+    free(self->tail->next);
+    free(self->head);
+    free(self);
+}
+
 /**
  * Prints all elements of the list to stdout.
  * Each element is formatted according to its `DataTypes`.
@@ -77,6 +121,12 @@ Dll* make_list() {
 void fmt(Dll* self) {
 
     if (self == NULL) {
+        printf("Nothing to do...");
+        return;
+    }
+
+    if (self->head == NULL && self->tail == NULL) {
+        printf("List {}\n");
         return;
     }
 

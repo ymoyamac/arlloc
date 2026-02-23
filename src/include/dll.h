@@ -65,8 +65,8 @@ struct dll_s
 };
 
 Dll* make_list();
+Dll* make_list_from(void* arr);
 void drop(Dll* self);
-//Dll* make_list(void* arr);
 void fmt(Dll* self);
 void* get_data_at(Dll* self, size_t index);
 void __push_back(Dll* self, void* data, DataTypes type);

@@ -42,6 +42,10 @@ int main() {
 
     fmt(list);
 
+    drop(list);
+
+    fmt(list);
+
 
     return 0;
 }
