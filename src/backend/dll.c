@@ -90,19 +90,39 @@ Dll* make_list_from(void* arr) {
     list->head = NULL;
     list->tail = NULL;
 
-    size_t len = len(arr);
-    for (size_t i = 0; i < len; i++)
-    {
+    // size_t len = len(arr);
+    // for (size_t i = 0; i < len; i++)
+    // {
         // push_back(list, arr[i]); -> No funciona
-    }
+    // }
     
 
     return list;
 }
 
+/**
+ * Free all elements of the list.
+ * Does nothing if `self` is `NULL`.
+ *
+ * @param self  Pointer to the list to print.
+ */
 void drop(Dll* self) {
     Node* iter = self->tail;
     while (iter) {
+        /**
+         * Free elements: Poping the last element of the list.
+         *
+         *  Step 1: 
+         * 
+         *  Head                          Tail                              (free)
+         *  +-------+-------+--------+    +-------+-------+--------+        +-------+-------+--------+
+         *  | prev  | data  |  next  +<-->| prev  | data  |  next  + >NULL  | prev  | data  |  next  +---> NULL
+         *  +-------+-------+--------+    +-------+-------+--------+        +-------+-------+--------+
+         *                                                     ^                |
+         *                                                     |                |
+         *                                                     +--------X-------+
+         * 
+         */
         free(iter->next);
         iter = iter->prev;
     }
