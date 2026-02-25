@@ -2,7 +2,7 @@
 #define ARLLOC_H
 
 #include "lib.h"
-#include "mem_block.h"
+#include "dll.h"
 #include "mem_region.h"
 
 typedef struct bump_arllocator_s BumpArllocator;
@@ -15,6 +15,6 @@ struct bump_arllocator_s
 };
 
 BumpArllocator* make_arllocator(void);
-void* arlloc(size_t size_in_bytes);
+void* arlloc(BumpArllocator* arlloc, size_t size_in_bytes);
 
 #endif

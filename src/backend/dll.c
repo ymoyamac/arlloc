@@ -1,6 +1,5 @@
 #include "dll.h"
 
-
 /**
  * Creates and initializes a new node with the given data and type.
  * If `malloc` cannot allocate memory, it returns `NULL`.

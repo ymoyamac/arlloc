@@ -5,9 +5,7 @@
 
 int main() {
 
-    int* number_ptr = (int*) arlloc(sizeof(int));
-
-    
+    //int* number_ptr = (int*) arlloc(sizeof(int));
 
     return 0;
 }

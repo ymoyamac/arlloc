@@ -1,8 +1,6 @@
 #ifndef DLL_H
 #define DLL_H
 
-#include <stdlib.h>
-#include <stdio.h>
 #include "lib.h"
 
 #define DEFAULT_CAPACITY 10

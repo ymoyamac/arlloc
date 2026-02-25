@@ -2,6 +2,7 @@
 #define MEM_BLOCK_H
 
 #include "lib.h"
+#include "dll.h"
 
 typedef struct block_s Block;
 
@@ -15,13 +16,15 @@ struct block_s {
      * | size    (8 bytes)  |              Allocatable Buffer                |
      * | next    (8 bytes)  |                                                |
      * +---------------------------------------------------------------------+
+     * ^                    ^
+     *                      *buffer
      */
     bool is_free;
     size_t size;
     Node* next_block;
 };
 
-void fmtblock(Block* block);
-
+char* fmt_block(Block* block);
+Block* make_block(size_t size);
 
 #endif
