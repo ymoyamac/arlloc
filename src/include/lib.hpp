@@ -1,13 +1,7 @@
-#ifndef LIB_H
-#define LIB_H
+#ifndef LIB_HPP
+#define LIB_HPP
 
-#include <stddef.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <sys/mman.h>
-#include <stdbool.h>
+#include <iostream>
 
 typedef int32_t i32;
 typedef int64_t i64;
@@ -25,5 +19,6 @@ typedef uint64_t u64;
 
 #define PAGE_SIZE KiB(4)
 #define len(arr) sizeof(arr)/sizeof(arr[0])
+
 
 #endif
