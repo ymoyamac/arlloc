@@ -29,6 +29,11 @@ int main() {
 
     std::println("{}", list.to_string());
 
+    list.push_front(99);
+    std::println("{}", list.to_string());
+    
+    std::println("Index 0: {}", list.at(0));
+
 
     return 0;
 }
