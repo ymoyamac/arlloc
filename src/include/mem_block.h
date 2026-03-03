@@ -24,7 +24,7 @@ struct block_s {
     Node* next_block;
 };
 
-char* fmt_block(Block* block);
 Block* make_block(size_t size);
+char* fmt_block(Block* block);
 
 #endif

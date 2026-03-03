@@ -206,7 +206,7 @@ void push_back(Dll* self, void* data, DataTypes type) {
      *  +-------+-------+--------+--------+
      *   NULL                      NULL
      */
-    if (self->head == NULL || self->tail == NULL) {
+    if (self->head == NULL && self->tail == NULL) {
         printf("List is empty...\n");
         self->head = new_node;
         self->tail = new_node;
