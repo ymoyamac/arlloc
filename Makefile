@@ -1,8 +1,8 @@
 # Compiler
-CC = gcc
+CC = g++
 
 # Compiler options
-CFLAGS = -Wall -Wextra -std=c17 -I src/include
+CFLAGS = -Wall -Wextra -std=c++23 -I src/include
 OFLAGS = -o
 
 # Directories
@@ -14,8 +14,8 @@ SUBDIRS = \
 TARGET = main
 
 DEPS = \
-    $(SRCDIR)/backend/dll.c \
-	$(SRCDIR)/main.c
+    $(SRCDIR)/backend/arlloc.cpp \
+	$(SRCDIR)/main.cpp
 
 # Main rule
 all: $(TARGET)
