@@ -280,4 +280,8 @@ public:
         return iter->data;
     }
 
+    bool is_empty() {
+        return this->size == 0;
+    }
+
 };

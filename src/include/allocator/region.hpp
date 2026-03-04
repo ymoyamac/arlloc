@@ -1,13 +1,49 @@
 #pragma once
 
 #include <iostream>
+#include <sys/mman.h>
 #include "lib.hpp"
-#include "node.hpp"
+#include "../dll/node.hpp"
+#include "../dll/list.hpp"
+#include "block.hpp"
 
 class Region {
 private:
-    std::size_t size = PAGE_SIZE;
-    std::size_t buffer_size = 0;
-    std::size_t free_size = 0;
-    std::unique_ptr<Node<Region>> next;
+    unsigned char* buffer;
+    std::size_t size;
+    std::size_t offset;
+    Node<Region>* next;
+    LinkedList<Block*> blocks;
+
+    Region() :
+        buffer((unsigned char*)this + sizeof(Region)),
+        size(PAGE_SIZE - sizeof(Region)),
+        offset(0),
+        next(nullptr) {}
+
+    void* mnb(std::size_t size);
+    
+
+public:
+
+    /**
+     * Region
+     *
+     *   56 bytes (metadata)           4040 bytes (available buffer)
+     *  +--------------------------------------------------------------------+
+     *  | buffer (8 bytes)  |                                                |
+     *  | size   (8 bytes)  |              Allocatable Buffer                |
+     *  | offset (8 bytes)  |                                                |
+     *  | next   (8 bytes)  |                                                |
+     *  | blocks (24bytes)  |                                                |
+     *  +--------------------------------------------------------------------+
+     *  ^                   ^
+     *  *region             *buffer
+     * 
+     */
+
+    static Region* init();
+    static void drop(Region* region);
+    static std::size_t total_region_size();
+    void* alloc(std::size_t);
 };

@@ -14,6 +14,7 @@ SUBDIRS = \
 TARGET = main
 
 DEPS = \
+    $(SRCDIR)/backend/allocator/region.cpp \
     $(SRCDIR)/backend/arlloc.cpp \
 	$(SRCDIR)/main.cpp
 
