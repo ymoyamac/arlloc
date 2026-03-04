@@ -12,6 +12,15 @@ Region* Region::init()  {
 }
 
 void Region::drop(Region* region) {
+    if (region == nullptr) {
+        return;
+    }
+    std::optional<Node<Block*>*> iter = region->blocks.first();
+    //TODO: liberar memoria de los bloques libres
+    while (iter != nullptr) {
+        iter.value()->data->~Block();
+        iter = iter.value()->next.get();
+    }
     region->~Region();
     munmap(region, PAGE_SIZE);
 }
@@ -102,7 +111,6 @@ void* Region::mnb(std::size_t size) {
 
 void* Region::alloc(std::size_t size) {
     void* ptr = this->mnb(size);
-
     return ptr;
 }
 

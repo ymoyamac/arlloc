@@ -2,8 +2,9 @@
 
 int main() {
 
-    Region* region = Region::init();
-    char* chars = (char*)region->alloc(10);
+    Arlloc arlloc = Arlloc{};
+
+    char* chars = (char*)arlloc.alloc(10);
 
     chars[0] = 'a';
     chars[1] = 'b';
@@ -24,6 +25,6 @@ int main() {
     }
     
 
-    Region::drop(region);
+    arlloc.dealloc();    
     return 0;
 }

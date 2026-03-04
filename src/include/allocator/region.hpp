@@ -26,6 +26,18 @@ private:
         printf("\x1B[32m[INFO]:\033[0m\t %s\n", this->to_string().c_str());
     }
 
+    ~Region() {
+        printf("\x1B[32m[INFO]:\033[0m\t Destroying region { buffer: \x1B[33m%p\033[0m, size: %zu }\n",
+            (void*)this->buffer, this->size);
+
+        // blocks es LinkedList<Block*>, la lista destruye sus nodos
+        // pero los Block* apuntan al buffer de mmap, solo nulleamos
+        this->buffer    = nullptr;
+        this->next      = nullptr;
+        this->size      = 0;
+        this->offset    = 0;
+    }
+
     void* mnb(std::size_t size);
     
 

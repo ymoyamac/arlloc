@@ -2,6 +2,8 @@
 
 #include "allocator/region.hpp"
 
+#define BUFFER_SIZE PAGE_SIZE - sizeof(Region) - sizeof(Block)
+
 class Arlloc {
 public:
     Arlloc() {
@@ -10,7 +12,7 @@ public:
     LinkedList<Block*> free_blocks;
     LinkedList<Region*> regions;
 
-    void* arlloc(std::size_t size);
-    
+    void* alloc(std::size_t size);
+    void dealloc(void);
 
 };

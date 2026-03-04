@@ -31,6 +31,13 @@ public:
         printf("\x1B[32m[INFO]:\033[0m\t Calling block constructor\n");
     }
 
+    ~Block() {
+        printf("\x1B[32m[INFO]:\033[0m\t Calling block destructor { size: %zu, region: \x1B[33m%p\033[0m }\n",
+            this->size, (void*)this->region);
+        this->region    = nullptr;
+        this->user_data = nullptr;
+    }
+
     std::size_t total_block_size(void);
     std::string to_string(void);
     
