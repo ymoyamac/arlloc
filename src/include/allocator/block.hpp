@@ -12,7 +12,10 @@ public:
     std::size_t size;
     Region* region;
 
-    Block() : is_free(true), size(0), region(nullptr) {}
+    Block() : is_free(true), size(0), region(nullptr)
+    {
+        printf("[INFO]:\t Calling block constructor\n");
+    }
 
     std::size_t total_block_size();
     

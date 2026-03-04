@@ -19,7 +19,12 @@ private:
         buffer((unsigned char*)this + sizeof(Region)),
         size(PAGE_SIZE - sizeof(Region)),
         offset(0),
-        next(nullptr) {}
+        next(nullptr)
+    {
+        printf("\x1B[32m[INFO]:\033[0m\t Region size: %zu bytes\n", this->total_region_size());
+        printf("\x1B[32m[INFO]:\033[0m\t Region { buffer: \x1B[33m%p\033[0m, size: %zu, offset: %zu, next: %p }\n", 
+            this->buffer, this->size, this->offset, this->next);
+    }
 
     void* mnb(std::size_t size);
     
