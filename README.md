@@ -1,8 +1,8 @@
-# Arlloc (memory allocator wirtten in C)
+# Arlloc (memory allocator wirtten in C++)
 
 # arlloc
 
-A custom memory allocator written in C, implementing an **arena allocator** strategy as an alternative to the system's `malloc`/`free`.
+A custom memory allocator written in C++, implementing an **arena allocator** strategy as an alternative to the system's `malloc`/`free`.
 
 ## Overview
 

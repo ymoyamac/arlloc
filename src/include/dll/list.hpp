@@ -3,10 +3,28 @@
 #include <sstream>
 #include <optional>
 #include <string>
-#include "dll/node.hpp"
+#include "node.hpp"
 
 template<typename T>
 class LinkedList {
+private:
+    /**
+     * Owning pointer to the first node.
+     * Destroying head destroys the entire chain automatically.
+     */
+    std::unique_ptr<Node<T>> head;
+
+    /**
+     * Non-owning pointer to the last node.
+     * Allows O(1) push_back and pop_back without traversing the list.
+     */
+    Node<T>* tail = nullptr;
+
+    /**
+     * Number of nodes currently in the list.
+     */
+    std::size_t size = 0;
+
 public:
 
     /**
@@ -262,22 +280,4 @@ public:
         return iter->data;
     }
 
-
-private:
-    /**
-     * Owning pointer to the first node.
-     * Destroying head destroys the entire chain automatically.
-     */
-    std::unique_ptr<Node<T>> head;
-
-    /**
-     * Non-owning pointer to the last node.
-     * Allows O(1) push_back and pop_back without traversing the list.
-     */
-    Node<T>* tail = nullptr;
-
-    /**
-     * Number of nodes currently in the list.
-     */
-    std::size_t size = 0;
 };
