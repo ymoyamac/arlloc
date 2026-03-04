@@ -1,9 +1,16 @@
-#ifndef ARLLOC_H
-#define ARLLOC_H
+#pragma once
 
-#include "lib.hpp"
-#include "dll/node.hpp"
-#include "dll/list.hpp"
 #include "allocator/region.hpp"
 
-#endif
+class Arlloc {
+public:
+    Arlloc() {
+        printf("\x1B[32m[INFO]:\033[0m\t Calling Arlloc constructor\n");
+    }
+    LinkedList<Block*> free_blocks;
+    LinkedList<Region*> regions;
+
+    void* arlloc(std::size_t size);
+    
+
+};

@@ -280,8 +280,22 @@ public:
         return iter->data;
     }
 
-    bool is_empty() {
+    bool is_empty(void) {
         return this->size == 0;
+    }
+
+    std::optional<Node<T>*> first() {
+        if (this->head == nullptr) {
+            return {};
+        }
+        return std::optional{this->head.get()};
+    }
+
+    std::optional<Node<T>*> last(void) {
+        if (this->tail == nullptr) {
+            return {};
+        }
+        return std::optional{this->tail};
     }
 
 };

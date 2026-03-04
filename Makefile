@@ -14,10 +14,10 @@ SUBDIRS = \
 TARGET = main
 
 DEPS = \
+    $(SRCDIR)/backend/allocator/block.cpp \
     $(SRCDIR)/backend/allocator/region.cpp \
     $(SRCDIR)/backend/arlloc.cpp \
-	$(SRCDIR)/main.cpp
-
+    $(SRCDIR)/main.cpp
 # Main rule
 all: $(TARGET)
 

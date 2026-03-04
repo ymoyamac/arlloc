@@ -3,9 +3,11 @@
 #include <iostream>
 #include <sys/mman.h>
 #include "lib.hpp"
-#include "../dll/node.hpp"
-#include "../dll/list.hpp"
+#include "dll/node.hpp"
+#include "dll/list.hpp"
 #include "block.hpp"
+
+class Block;
 
 class Region {
 private:
@@ -21,9 +23,7 @@ private:
         offset(0),
         next(nullptr)
     {
-        printf("\x1B[32m[INFO]:\033[0m\t Region size: %zu bytes\n", this->total_region_size());
-        printf("\x1B[32m[INFO]:\033[0m\t Region { buffer: \x1B[33m%p\033[0m, size: %zu, offset: %zu, next: %p }\n", 
-            this->buffer, this->size, this->offset, this->next);
+        printf("\x1B[32m[INFO]:\033[0m\t %s\n", this->to_string().c_str());
     }
 
     void* mnb(std::size_t size);
@@ -50,5 +50,7 @@ public:
     static Region* init();
     static void drop(Region* region);
     static std::size_t total_region_size();
+    std::string to_string(void);
     void* alloc(std::size_t);
+    void* wis_offset(void);
 };

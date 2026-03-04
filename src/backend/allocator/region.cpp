@@ -1,5 +1,6 @@
 #include "lib.hpp"
 #include "./allocator/region.hpp"
+#include "./allocator/block.hpp"
 
 Region* Region::init()  {
     void* mem = mmap(NULL, PAGE_SIZE, PROT_RW, MAP_FLAGS, -1, 0);
@@ -13,6 +14,23 @@ Region* Region::init()  {
 void Region::drop(Region* region) {
     region->~Region();
     munmap(region, PAGE_SIZE);
+}
+
+std::size_t Region::total_region_size() {
+    return sizeof(Region);
+}
+
+std::string Region::to_string(void) {
+    std::ostringstream oss;
+    oss << "Region {";
+    oss << " header_size: " << "\"" << this->total_region_size() << " bytes\"";
+    oss << ", buffer: "     << "\x1B[33m0x" << std::hex << (uintptr_t)this->buffer << "\033[0m";
+    oss << ", size: "   << std::dec << this->size;
+    oss << ", offset: " << this->offset;
+    oss << ", next: "   << "\x1B[33m0x" << std::hex << (uintptr_t)this->next   << "\033[0m";
+    oss << ", blocks: " << std::dec << this->blocks.get_size();
+    oss << " }";
+    return oss.str();
 }
 
 void* Region::mnb(std::size_t size) {
@@ -48,8 +66,11 @@ void* Region::mnb(std::size_t size) {
     printf("\x1B[32m[INFO]:\033[0m\t Block* {\x1B[33m%p\033[0m}\n", block);
     block->size = size;
     block->is_free = false;
+    block->region = this;
 
     void* ptr = (unsigned char*)block + sizeof(Block);
+    block->user_data = ptr;
+    printf("\x1B[32m[INFO]:\033[0m\t %s\n", block->to_string().c_str());
 
     printf("\x1B[32m[INFO]:\033[0m\t Block size: %zu bytes\n", sizeof(Block));
     printf("\x1B[32m[INFO]:\033[0m\t User data* {\x1B[33m%p\033[0m}\n", ptr);
@@ -80,13 +101,11 @@ void* Region::mnb(std::size_t size) {
 }
 
 void* Region::alloc(std::size_t size) {
-    if (this->blocks.is_empty()) {
-        return this->mnb(size);
-    }
+    void* ptr = this->mnb(size);
 
-    return NULL;
+    return ptr;
 }
 
-std::size_t Region::total_region_size() {
-    return sizeof(Region);
+void* Region::wis_offset(void) {
+    return (void*) offset;
 }
