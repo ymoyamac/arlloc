@@ -39,9 +39,9 @@ private:
     }
 
     /** Make new block */
-    void* mnb(std::size_t size);
+    void* mnb(LinkedList<Block*>* free_blocks, std::size_t size);
     /** Make free block */
-    void* mfb(void* ptr, std::size_t size);
+    Block* mfb(void* ptr, std::size_t size);
     
 
 public:
@@ -66,6 +66,6 @@ public:
     static void drop(Region* region);
     static std::size_t total_region_size();
     std::string to_string(void);
-    void* alloc(std::size_t);
+    void* alloc(LinkedList<Block*>* free_blocks, std::size_t);
     void* wis_offset(void);
 };

@@ -23,6 +23,10 @@ int main() {
         printf("CharsAdrr: %p, Value: %c\n", chars + i, chars[i]);
 
     }
+
+    int* num = (int*)arlloc.alloc(sizeof(int));
+    *num = 10;
+    printf("Num: %d\n", *num);
     
 
     arlloc.dealloc();    
