@@ -59,4 +59,12 @@ public:
      * @return  A formatted string with all block fields.
      */
     std::string to_string(void);
+
+    /**
+     * Split one free block to get new block where the user will writes
+     * his data and new next free_block
+     */
+    static std::optional<std::pair<Block*, Block*>> split(Block* free_block);
+
+    static void* mnb(LinkedList<Block*>* free_blocks, std::size_t size);
 };

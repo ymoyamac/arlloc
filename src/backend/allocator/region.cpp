@@ -4,7 +4,7 @@
 
 Region* Region::init() {
     printf("\x1B[32m[INFO]:\033[0m\t Making new Region...\n");
-    printf("\x1B[32m[INFO]:\033[0m\t =====================================================================================================================\n");
+    printf("\x1B[32m[INFO]:\033[0m\t ===============================================================================================================\n");
     void* mem = mmap(NULL, PAGE_SIZE, PROT_RW, MAP_FLAGS, -1, 0);
     printf("\x1B[32m[INFO]:\033[0m\t Region* {\x1B[33m%p\033[0m}\n", mem);
     if (mem == MAP_FAILED) {
@@ -130,7 +130,7 @@ void* Region::mnb(LinkedList<Block*>* free_blocks, std::size_t size) {
 
     this->blocks.push_back(block);
     printf("\x1B[32m[INFO]:\033[0m\t Blocks: %s\n", this->blocks.to_string().c_str());
-    printf("\x1B[32m[INFO]:\033[0m\t =====================================================================================================================\n");
+    printf("\x1B[32m[INFO]:\033[0m\t ===============================================================================================================\n");
 
     /** Register the remaining free space as a free block. */
     Block* free_block = this->mfb(ptr, size);
@@ -162,7 +162,7 @@ Block* Region::mfb(void* ptr, std::size_t user_data_size) {
     block->region  = this;
 
     printf("\x1B[32m[INFO]:\033[0m\t Free %s\n", block->to_string().c_str());
-    printf("\x1B[32m[INFO]:\033[0m\t =====================================================================================================================\n");
+    printf("\x1B[32m[INFO]:\033[0m\t ===============================================================================================================\n");
     return block;
 }
 
