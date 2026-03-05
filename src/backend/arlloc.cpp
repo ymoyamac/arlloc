@@ -11,7 +11,7 @@ void* Arlloc::find_free_block(std::size_t size) {
     if (!this->free_blocks.first().has_value()) {
         return nullptr;
     }
-
+    //TODO: Block spliting
     
     return nullptr;
 }
