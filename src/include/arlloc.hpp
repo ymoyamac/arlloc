@@ -6,16 +6,62 @@
 
 class Arlloc {
 private:
+    /**
+     * List of all regions managed by this allocator.
+     * Each region is a PAGE_SIZE mmap allocation.
+     */
+    LinkedList<Region*> regions;
+
+    /**
+     * List of free blocks available for reuse.
+     * Populated when a block is deallocated or when a new region is created.
+     */
+    LinkedList<Block*> free_blocks;
+
+    /**
+     * Searches for a free block large enough to fit `size` bytes.
+     * If a suitable block is found, performs block splitting to avoid wasting memory.
+     * Returns nullptr if no suitable block exists.
+     *
+     * @param size  Number of bytes requested by the user.
+     * @return      Pointer to the usable memory, or nullptr if not found.
+     */
     void* find_free_block(std::size_t size);
 
 public:
+
+    /**
+     * Constructs the allocator with empty region and free block lists.
+     */
     Arlloc() {
         printf("\x1B[32m[INFO]:\033[0m\t Calling Arlloc constructor\n");
     }
-    LinkedList<Block*> free_blocks;
-    LinkedList<Region*> regions;
 
+    /**
+     * Destroys the allocator and releases all regions back to the OS via munmap.
+     */
+    ~Arlloc() {
+        std::optional<Node<Region*>*> iter = this->regions.first();
+        while (iter.has_value()) {
+            Region::drop(iter.value()->data);
+            iter = iter.value()->next.get();
+        }
+    }
+
+    /**
+     * Allocates `size` bytes and returns a pointer to the usable memory.
+     * First attempts to reuse a free block. If none is available, creates a new region.
+     *
+     * @param size  Number of bytes to allocate.
+     * @return      Pointer to the allocated memory.
+     */
     void* alloc(std::size_t size);
-    void dealloc(void);
 
+    /**
+     * Marks the block at `ptr` as free and adds it to the free block list.
+     * The memory is not returned to the OS until the allocator is destroyed.
+     *
+     * @param ptr  Pointer previously returned by `alloc`.
+     */
+    void dealloc(void* ptr);
 };
