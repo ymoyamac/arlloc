@@ -3,6 +3,7 @@
 #include "./allocator/block.hpp"
 
 Region* Region::init()  {
+    //TODO: Agregar valores de PAGE_SIZE alineados a una potencia de dos: 4, 8, 12
     void* mem = mmap(NULL, PAGE_SIZE, PROT_RW, MAP_FLAGS, -1, 0);
     printf("\x1B[32m[INFO]:\033[0m\t Region* {\x1B[33m%p\033[0m}\n", mem);
     if (mem == MAP_FAILED) {
@@ -32,7 +33,7 @@ std::size_t Region::total_region_size() {
 std::string Region::to_string(void) {
     std::ostringstream oss;
     oss << "Region {";
-    oss << " header_size: " << "\"" << this->total_region_size() << " bytes\"";
+    oss << " metada_size: " << "\x1B[96m" << "\"" << this->total_region_size() << " bytes\"" << "\033[0m";
     oss << ", buffer: "     << "\x1B[33m0x" << std::hex << (uintptr_t)this->buffer << "\033[0m";
     oss << ", size: "   << std::dec << this->size;
     oss << ", offset: " << this->offset;
@@ -44,22 +45,6 @@ std::string Region::to_string(void) {
 
 void* Region::mnb(std::size_t size) {
     printf("\x1B[32m[INFO]:\033[0m\t making new block...\n");
-    /**
-     * Region
-     *
-     *   56 bytes (metadata)           4040 bytes (available buffer)
-     *  +-------------------+-------------------------------------------------------------+
-     *  |                   |                                                             |
-     *  | buffer (8 bytes)  |+----------+------------------+----------+------------------+|
-     *  | size   (8 bytes)  ||  Block   |   user data      |  Block   |   free block     ||
-     *  | offset (8 bytes)  || (header) |   (size bytes)   | (header) |   (size bytes)   ||
-     *  | next   (8 bytes)  |+----------+------------------+----------+------------------+|
-     *  | blocks (24bytes)  |^          ^                                                 |
-     *  |                   |offset     offset + sizeof(Block)                            |
-     *  +-------------------+-------------------------------------------------------------+
-     *  ^                   ^                   
-     *  *region             *buffer             
-     */
     if (size == 0) {
         return nullptr;
     }
@@ -77,8 +62,25 @@ void* Region::mnb(std::size_t size) {
     block->is_free = false;
     block->region = this;
 
+    /**
+     * Region
+     *
+     *   56 bytes (metadata)           4040 bytes (available buffer)
+     *  +-------------------+-------------------------------------------------------------+
+     *  |                   |                                                             |
+     *  | buffer (8 bytes)  |+----------+------------------+----------+------------------+|
+     *  | size   (8 bytes)  ||  Block   |   user data      |  Block   |   free block     ||
+     *  | offset (8 bytes)  || (header) |   (size bytes)   | (header) |   (size bytes)   ||
+     *  | next   (8 bytes)  |+----------+------------------+----------+------------------+|
+     *  | blocks (24bytes)  |^          ^                                                 |
+     *  |                   |offset     ptr = offset + sizeof(Block)                      |
+     *  +-------------------+-------------------------------------------------------------+
+     *  ^                   ^                   
+     *  *region             *buffer             
+     */
     void* ptr = (unsigned char*)block + sizeof(Block);
     block->user_data = ptr;
+
     printf("\x1B[32m[INFO]:\033[0m\t %s\n", block->to_string().c_str());
 
     printf("\x1B[32m[INFO]:\033[0m\t Block size: %zu bytes\n", sizeof(Block));
@@ -89,7 +91,7 @@ void* Region::mnb(std::size_t size) {
      *
      *   56 bytes (metadata)           4040 bytes (available buffer)
      *  +-------------------+-------------------------------------------------------------+
-     *  |                   | 24 bytes                                                    |
+     *  |                   | 32 bytes                                                    |
      *  | buffer (8 bytes)  |+----------+------------------+----------+------------------+|
      *  | size   (8 bytes)  ||  Block   |   user data      |  Block   |   free block     ||
      *  | offset (8 bytes)  || (header) |   (size bytes)   | (header) |   (size bytes)   ||
@@ -106,11 +108,48 @@ void* Region::mnb(std::size_t size) {
 
     this->blocks.push_back(block);
     printf("\x1B[32m[INFO]:\033[0m\t Blocks: %s\n", this->blocks.to_string().c_str());
+    printf("\x1B[32m[INFO]:\033[0m\t =====================================================================================================================\n");
+    this->mfb(ptr, size);
     return ptr;
 }
 
+void* Region::mfb(void* ptr, std::size_t user_data_size) {
+    std::size_t aligned = ALIGN(user_data_size, 8);
+    printf("\x1B[32m[INFO]:\033[0m\t Aligned: %zu, Offset: %zu\n", aligned, this->offset);
+
+    Block* block = (Block*)((unsigned char*)ptr + aligned);
+    printf("\x1B[32m[INFO]:\033[0m\t Free Block* {\x1B[33m%p\033[0m}\n", block);
+    block->size = PAGE_SIZE - sizeof(Region) - (this->blocks.get_size() * sizeof(Block)) - user_data_size;
+    block->is_free = true;
+    block->region = this;
+    printf("\x1B[32m[INFO]:\033[0m\t Free %s\n", block->to_string().c_str());
+    printf("\x1B[32m[INFO]:\033[0m\t =====================================================================================================================\n");
+
+}
+
+/**
+ * Returns the pointer to the empty space where the user can write their data
+ */
 void* Region::alloc(std::size_t size) {
     void* ptr = this->mnb(size);
+    /**
+     * Region
+     *
+     *   56 bytes (metadata)           4040 bytes (available buffer)
+     *  +-------------------+-------------------------------------------------------------+
+     *  |                   | 24 bytes                                                    |
+     *  | buffer (8 bytes)  |+----------+------------------+----------+------------------+|
+     *  | size   (8 bytes)  ||  Block   |   user data      |  Block   |   free block     ||
+     *  | offset (8 bytes)  || (header) |   (size bytes)   | (header) |   (size bytes)   ||
+     *  | next   (8 bytes)  |+----------+------------------+----------+------------------+|
+     *  | blocks (24bytes)  |^          ^                  |                              |
+     *  |                   |block      *ptr               |                              |
+     *  +-------------------+-----------|-------------------------------------------------+
+     *  ^                   ^           |                  ^
+     *  *region             *buffer     |                  offset
+     *                                  |
+     *                                  Returns this pointer
+     */
     return ptr;
 }
 

@@ -5,6 +5,9 @@
 #define BUFFER_SIZE PAGE_SIZE - sizeof(Region) - sizeof(Block)
 
 class Arlloc {
+private:
+    void* find_free_block(std::size_t size);
+
 public:
     Arlloc() {
         printf("\x1B[32m[INFO]:\033[0m\t Calling Arlloc constructor\n");

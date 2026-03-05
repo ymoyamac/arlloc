@@ -38,7 +38,10 @@ private:
         this->offset    = 0;
     }
 
+    /** Make new block */
     void* mnb(std::size_t size);
+    /** Make free block */
+    void* mfb(void* ptr, std::size_t size);
     
 
 public:
