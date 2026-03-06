@@ -1,10 +1,10 @@
 #include "arlloc.hpp"
 
 void* Arlloc::find_free_block(usize size) {
+    Logger::info("Memory requested by the user \x1B[96m\"%zu bytes\"\033[0m, free bytes: \x1B[96m\"%llu bytes\"\033[0m", size, BUFFER_SIZE);
     Logger::info("Looking for a free block...");
     /** First allocation: no regions exist yet. */
     if (this->regions.is_empty() && this->free_blocks.is_empty()) {
-        Logger::info("Memory requested by the user \x1B[96m\"%zu bytes\"\033[0m, free bytes: \x1B[96m\"%llu bytes\"\033[0m", size, BUFFER_SIZE);
         return nullptr;
     }
 
@@ -90,7 +90,7 @@ void* Arlloc::find_free_block(usize size) {
                 /** Not enough remaining space for a new block, discard the leftover. */
                 //TODO: pop_at del bloque libre, no es un bloque valido porque es
                 //muy pequeño
-                printf("\x1B[32m[INFO]:\033[0m\t Leftover too small, discarded\n");
+                Logger::info("Leftover too small, discarded");
             } else {
                 this->free_blocks.push_back(tupla.value().second);
             }
@@ -101,7 +101,7 @@ void* Arlloc::find_free_block(usize size) {
 
     }
 
-    printf("\x1B[32m[INFO]:\033[0m\t Let's make new region...\n");
+    Logger::info("Let's make new region...");
     return nullptr;
 }
 
@@ -117,6 +117,8 @@ void* Arlloc::alloc(usize size) {
 }
 
 void Arlloc::dealloc(void* ptr) {
+
+    //TODO: Llammar a munmap cuando todos los bloque esten libres de una region
     
     //TODO: Agregar merge blocking, si un bloque queda libre a lado de otro
     //se juntan para hacer un bloque solo con la suma de ambos espacios libres

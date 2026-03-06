@@ -63,7 +63,7 @@ private:
      * The LinkedList destructor handles node cleanup automatically.
      */
     ~Region() {
-        printf("Destroying Region { buffer: \x1B[33m%p\033[0m, size: %zu }", (void*)this->buffer, this->size);
+        Logger::info("Destroying Region { buffer: \x1B[33m%p\033[0m, size: %zu }", (void*)this->buffer, this->size);
         this->buffer = nullptr;
         this->size   = 0;
         this->offset = 0;
@@ -89,7 +89,7 @@ private:
      * @param user_data_size  Size of the user data just allocated.
      * @return                Pointer to the new free Block.
      */
-    Block* mfb(void* ptr, usize user_data_size);
+    Block* mfb();
 
 public:
 

@@ -42,7 +42,7 @@ public:
         : is_free(is_free), size(size), region(region), user_data(user_data)
     {
         Logger::info("Calling block constructor args...");
-        Logger::info("Region* {\x1B[33m%p\033[0m}", (void*)this);
+        Logger::info("Block * {\x1B[33m%p\033[0m}", (void*)this);
         Logger::info(this->to_string().c_str());
         Logger::divider();
     }

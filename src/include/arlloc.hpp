@@ -43,23 +43,18 @@ public:
     ~Arlloc() {
         Logger::info("Calling Arlloc destructor...");
 
-        /** Clear free_blocks first to avoid dangling pointers into mmap pages. */
-        this->free_blocks.clear();
-
         std::optional<Node<Region*>*> iter = this->regions.first();
         while (iter.has_value()) {
             Node<Region*>* current = iter.value();
-            iter = current->next.get();
+            Node<Region*>* next = current->next.get();
             Region::drop(current->data);
+            iter = next != nullptr ? std::optional{next} : std::nullopt;
         }
 
-        /** Clear regions to release Node<Region*> heap memory cleanly.
-         *  Region::drop already released the mmap pages, so data pointers
-         *  inside each node are now dangling. clear() prevents ~LinkedList
-         *  from accessing them during automatic destruction.
-         */
+        this->free_blocks.clear();
         this->regions.clear();
     }
+
     /**
      * Allocates `size` bytes and returns a pointer to the usable memory.
      * First attempts to reuse a free block. If none is available, creates a new region.
