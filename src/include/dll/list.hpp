@@ -298,4 +298,9 @@ public:
         return std::optional{this->tail};
     }
 
+    void clear() {
+        this->head = nullptr;  // unique_ptr chain destroys all Node<T> heap allocations
+        this->tail = nullptr;
+        this->size = 0;
+    }
 };

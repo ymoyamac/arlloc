@@ -41,13 +41,23 @@ public:
      * Destroys the allocator and releases all regions back to the OS via munmap.
      */
     ~Arlloc() {
+        /** Clear free_blocks first to avoid dangling pointers into mmap pages. */
+        this->free_blocks.clear();
+
         std::optional<Node<Region*>*> iter = this->regions.first();
         while (iter.has_value()) {
-            Region::drop(iter.value()->data);
-            iter = iter.value()->next.get();
+            Node<Region*>* current = iter.value();
+            iter = current->next.get();
+            Region::drop(current->data);
         }
-    }
 
+        /** Clear regions to release Node<Region*> heap memory cleanly.
+         *  Region::drop already released the mmap pages, so data pointers
+         *  inside each node are now dangling. clear() prevents ~LinkedList
+         *  from accessing them during automatic destruction.
+         */
+        this->regions.clear();
+    }
     /**
      * Allocates `size` bytes and returns a pointer to the usable memory.
      * First attempts to reuse a free block. If none is available, creates a new region.

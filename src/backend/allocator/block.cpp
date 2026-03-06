@@ -17,18 +17,57 @@ std::string Block::to_string(void) {
     return oss.str();
 }
 
-std::optional<std::pair<Block*, Block*>> Block::split(Block* free_block) {
+std::optional<std::pair<Block*, Block*>> Block::split(Block* free, std::size_t size) {
     printf("\x1B[32m[INFO]:\033[0m\t ===============================================================================================================\n");
     printf("\x1B[32m[INFO]:\033[0m\t Block Spliting\n");
 
-    //TODO: checar si el user_data es menor al espacio tenemos que dividir el bloque
-    //pero no vamos a dividir el bloque en caso de: El espacio sobrante es menor al
-    //tamaño del header del bloque (32 bytes hasta este punto) porque no quedará
-    //espacio para crear un bloque nuevo, si el espacio restante es de 33 bytes
-    //no se puede crear un bloque por que tiene que estar alineado, tenemos que crear
-    //bloques multiplos, ejem: si el usuario pide un byte para almacenar, yo de voy a
-    //dar un bloque de (32bytes) + 4 bytes = 36 bytes, es lo mínimo
+    /// Mark the free block as used and set its size to exactly what was requested.
+    ///
+    ///  Before:
+    ///  +----------+--------------------------------------------+
+    ///  |  Block   |         free->size bytes                   |
+    ///  | (header) |                                            |
+    ///  +----------+--------------------------------------------+
+    ///
+    ///  After split:
+    ///  +----------+------------+----------+--------------------+
+    ///  |  Block   | user data  |  Block   |  remaining bytes   |
+    ///  | (header) | size bytes | (header) |                    |
+    ///  +----------+------------+----------+--------------------+
 
+    printf("\x1B[32m[INFO]:\033[0m\t Block* {\x1B[33m%p\033[0m}\n", (void*)free);
+    std::size_t original_size = free->size;
+    free->is_free   = false;
+    free->size      = size;
+    free->user_data = (unsigned char*)free + sizeof(Block);
+
+    printf("\x1B[32m[INFO]:\033[0m\t %s\n", free->to_string().c_str());
+    printf("\x1B[32m[INFO]:\033[0m\t Block size: %zu bytes\n", free->size);
+    printf("\x1B[32m[INFO]:\033[0m\t User data* {\x1B[33m%p\033[0m}\n", free->user_data);
+
+    std::pair<Block*, Block*> tupla;
+    tupla.first = free;
+
+    /**
+     * Block splitting: if the remaining space after the allocation is large enough
+     * to hold a Block header plus at least one byte, create a new free block.
+     * Otherwise discard the leftover to avoid unusable fragments.
+     */
+    if ((original_size - sizeof(Block) - size) > (sizeof(Block) + MINIMUM_SIZE)) {
+        Block* remaining = new((unsigned char*)free->user_data + size) Block();
+        printf("\x1B[32m[INFO]:\033[0m\t Free Block* {\x1B[33m%p\033[0m}\n", (void*)remaining);
+        remaining->is_free   = true;
+        remaining->size      = original_size - sizeof(Block) - size;
+        remaining->region    = free->region;
+        remaining->user_data = nullptr;
+        printf("\x1B[32m[INFO]:\033[0m\t Free New %s\n", remaining->to_string().c_str());
+        printf("\x1B[32m[INFO]:\033[0m\t Free block size: %zu bytes\n", remaining->size);
+        tupla.second = remaining;
+        return std::optional{tupla};
+    }
+
+    printf("\x1B[32m[INFO]:\033[0m\t There is sufficient space to create a block with the minimum size: 32 bytes + 4 bytes = 36 bytes\n");
+    tupla.second = nullptr;
     printf("\x1B[32m[INFO]:\033[0m\t ===============================================================================================================\n");
-    return std::nullopt;
+    return std::optional{tupla};
 }

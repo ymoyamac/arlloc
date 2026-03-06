@@ -26,7 +26,7 @@ int main() {
     }
 
     /** Second allocation reuses the free block from the first region via block splitting. */
-    int* num = (int*)arlloc.alloc(sizeof(int));
+    int* num = (int*)arlloc.alloc(sizeof(int) * 10);
     *num = 10;
     printf("Num: %d\n", *num);
 

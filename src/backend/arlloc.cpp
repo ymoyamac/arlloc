@@ -1,6 +1,7 @@
 #include "arlloc.hpp"
 
 void* Arlloc::find_free_block(std::size_t size) {
+    printf("\x1B[32m[INFO]:\033[0m\t Looking for a free block...\n");
     /** First allocation: no regions exist yet. */
     if (this->regions.is_empty() && this->free_blocks.is_empty()) {
         printf("\x1B[32m[INFO]:\033[0m\t BUFFER_SIZE: %llu bytes\n", BUFFER_SIZE);
@@ -23,12 +24,24 @@ void* Arlloc::find_free_block(std::size_t size) {
     while(iter != nullptr) {
         Block* candidate = iter->data;
 
-        if (!candidate->is_free || candidate->size < size) {
+        if (!candidate->is_free) {
+            /** 
+             * Defensive check: block should not be in free_blocks with is_free=false.
+             * This happens because pop_at is not yet implemented.
+             * TODO: remove with pop_at once available.
+             */
             iter = iter->next.get();
             continue;
         }
 
-        if (candidate->size) {
+        if (candidate->size < size) {
+            /** Block is too small for this request, keep looking. */
+            iter = iter->next.get();
+            continue;
+        }
+
+
+        if (candidate->size == size) {
             /**
              * Case 1: exact fit, reuse the block directly without splitting.
              *
@@ -68,13 +81,20 @@ void* Arlloc::find_free_block(std::size_t size) {
              *  | !is_free | size bytes | is_free  |                    |
              *  +----------+------------+----------+--------------------+
              */
-            std::optional<std::pair<Block*, Block*>> tupla = Block::split(iter->data);
+            std::optional<std::pair<Block*, Block*>> tupla = Block::split(iter->data, size);
             if (tupla == std::nullopt) {
                 printf("\x1B[91m[ERROR]:\033[0m\t Block split failed\n");
                 return nullptr;
             }
+            if (tupla.value().second == nullptr) {
+                /** Not enough remaining space for a new block, discard the leftover. */
+                //TODO: pop_at del bloque libre, no es un bloque valido porque es
+                //muy pequeño
+                printf("\x1B[32m[INFO]:\033[0m\t Leftover too small, discarded.\n");
+            } else {
+                this->free_blocks.push_back(tupla.value().second);
+            }
             //TODO: pop_at el bloque libre
-            this->free_blocks.push_back(tupla.value().second);
             return (unsigned char*)tupla.value().first + sizeof(Block);
         }
 
