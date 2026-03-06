@@ -80,7 +80,6 @@ void* Arlloc::find_free_block(usize size) {
              *  | !is_free | size bytes | is_free  |                    |
              *  +----------+------------+----------+--------------------+
              */
-            //TODO: Arreglar la libreración de memoria
             std::optional<std::pair<Block*, Block*>> tupla = Block::split(iter->data, size);
             if (tupla == std::nullopt) {
                 Logger::error("Block split failed");
@@ -93,6 +92,7 @@ void* Arlloc::find_free_block(usize size) {
                 Logger::info("Leftover too small, discarded");
             } else {
                 this->free_blocks.push_back(tupla.value().second);
+                Logger::info("Free Blocks: %s", this->free_blocks.to_string().c_str());
             }
             //TODO: pop_at el bloque libre
             return (unsigned char*)tupla.value().first + sizeof(Block);
@@ -113,7 +113,11 @@ void* Arlloc::alloc(usize size) {
     /** No suitable free block found: create a new region. */
     Region* region = Region::init();
     this->regions.push_back(region);
-    return region->alloc(&this->free_blocks, size);
+    Logger::info("Region list: %s", this->regions.to_string().c_str());
+    Logger::divider();
+    void* raw_pointer = region->alloc(&this->free_blocks, size);
+    Logger::info("Free Blocks: %s", this->free_blocks.to_string().c_str());
+    return raw_pointer;
 }
 
 void Arlloc::dealloc(void* ptr) {

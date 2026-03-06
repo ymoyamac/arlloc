@@ -33,7 +33,7 @@ public:
      */
     Block() : is_free(true), size(0), region(nullptr), user_data(nullptr) {
         Logger::info("Calling block constructor");
-        Logger::info("Block* {\x1B[33m%p\033[0m}", (void*)this);
+        Logger::info("Block* { \x1B[33m%p\033[0m }", (void*)this);
         Logger::info(this->to_string().c_str());
         Logger::divider();
     }

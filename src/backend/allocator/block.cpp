@@ -58,6 +58,7 @@ std::optional<std::pair<Block*, Block*>> Block::split(Block* free, usize size) {
             nullptr                                         //block->user_data
         );
         tupla.second = remaining;
+        Logger::info(remaining->to_string().c_str());
         return std::optional{tupla};
     }
 

@@ -301,7 +301,6 @@ public:
     }
 
     void clear() {
-        
         while (!this->is_empty()) {
             this->pop_front();
         }
