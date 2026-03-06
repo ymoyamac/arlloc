@@ -1,10 +1,10 @@
 #include "arlloc.hpp"
 
 void* Arlloc::find_free_block(usize size) {
+    Logger::info("Memory requested by the user \x1B[96m\"%zu bytes\"\033[0m, free bytes: \x1B[96m\"%llu bytes\"\033[0m", size, BUFFER_SIZE);
     Logger::info("Looking for a free block...");
     /** First allocation: no regions exist yet. */
     if (this->regions.is_empty() && this->free_blocks.is_empty()) {
-        Logger::info("Memory requested by the user \x1B[96m\"%zu bytes\"\033[0m, free bytes: \x1B[96m\"%llu bytes\"\033[0m", size, BUFFER_SIZE);
         return nullptr;
     }
 

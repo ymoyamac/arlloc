@@ -23,7 +23,7 @@ private:
     /**
      * Number of nodes currently in the list.
      */
-    std::size_t size = 0;
+    usize size = 0;
 
 public:
 
@@ -52,7 +52,7 @@ public:
      *
      * @return  Reference to the size of the list.
      */
-    std::size_t& get_size() {
+    usize& get_size() {
         return this->size;
     }
 
@@ -267,16 +267,16 @@ public:
      * O(n) - access by index.
      * Optimised: search from head or tail depending on which side is closer.
      */
-    T& at(std::size_t index) {
+    T& at(usize index) {
         if (index >= this->size) throw std::out_of_range("Index out of range");
         Node<T>* iter;
         if (index < this->size / 2) {
             iter = this->head.get();
-            for (std::size_t i = 0; i < index; i++)
+            for (usize i = 0; i < index; i++)
                 iter = iter->next.get();
         } else {
             iter = this->tail;
-            for (std::size_t i = this->size - 1; i > index; i--)
+            for (usize i = this->size - 1; i > index; i--)
                 iter = iter->prev;
         }
         return iter->data;

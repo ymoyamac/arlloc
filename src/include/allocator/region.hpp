@@ -89,7 +89,7 @@ private:
      * @param user_data_size  Size of the user data just allocated.
      * @return                Pointer to the new free Block.
      */
-    Block* mfb(void* ptr, usize user_data_size);
+    Block* mfb();
 
 public:
 

@@ -8,10 +8,11 @@ Region* Region::init() {
         throw std::runtime_error("mmap failed");
     }
     Logger::info("mmap* {\x1B[33m%p\033[0m}", mem);
-    Logger::info("PAGE_SIZE: %d bytes", PAGE_SIZE);
-    Logger::info("REGION_HEADER_SIZE: %d bytes", REGION_HEADER_SIZE);
-    Logger::info("REGION_BUFFER_SIZE: %d bytes", REGION_BUFFER_SIZE);
-    Logger::info("BLOCK_HEADER_SIZE: %d bytes", BLOCK_HEADER_SIZE);
+    Logger::info("ALIGNMENT: \x1B[96m\"%d bytes\"\033[0m", ALIGNMENT);
+    Logger::info("PAGE_SIZE: \x1B[96m\"%d bytes\"\033[0m", PAGE_SIZE);
+    Logger::info("REGION_HEADER_SIZE: \x1B[96m\"%d bytes\"\033[0m", REGION_HEADER_SIZE);
+    Logger::info("REGION_BUFFER_SIZE: \x1B[96m\"%d bytes\"\033[0m", REGION_BUFFER_SIZE);
+    Logger::info("BLOCK_HEADER_SIZE: \x1B[96m\"%d bytes\"\033[0m", BLOCK_HEADER_SIZE);
     Logger::divider();
     /** Construct Region in-place at the start of the mmap page using placement new. */
     return new(mem) Region();
@@ -63,10 +64,12 @@ void* Region::mnb(LinkedList<Block*>* free_blocks, usize size) {
         return nullptr;
     }
 
-    usize aligned = ALIGN(this->offset, 8);
-    Logger::info("Aligned: %zu, Offset: %zu", aligned, this->offset);
+    usize aligned_size = ALIGN(size);
+    usize aligned_offset = ALIGN(this->offset);
 
-    if (aligned + sizeof(Block) + size > this->size) {
+    Logger::info("Aligned: %zu, Offset: %zu", aligned_offset, this->offset);
+
+    if (aligned_offset + sizeof(Block) + aligned_size > this->size) {
         Logger::error("Insufficient space in region");
         return nullptr;
     }
@@ -82,11 +85,11 @@ void* Region::mnb(LinkedList<Block*>* free_blocks, usize size) {
      *  | (header) |   (size bytes)   |
      *  +----------+------------------+
      */
-    Block* block = new(this->buffer + aligned) Block(
-        false,  // block->is_free
-        size,   // block->size
-        this,   // block->region
-        (unsigned char*)(this->buffer + aligned) + sizeof(Block) //block->user_data
+    Block* block = new(this->buffer + aligned_offset) Block(
+        false,                                                          // block->is_free
+        aligned_size,                                                   // block->size
+        this,                                                           // block->region
+        (unsigned char*)(this->buffer + aligned_offset) + sizeof(Block) //block->user_data
     );
 
     /** User data starts immediately after the Block header. */
@@ -103,21 +106,21 @@ void* Region::mnb(LinkedList<Block*>* free_blocks, usize size) {
      *  ^                               ^                              ^
      *  offset (before)                 block                          offset (after)
      */
-    this->offset = aligned + sizeof(Block) + size;
+    this->offset = aligned_offset + sizeof(Block) + aligned_size;
 
     this->blocks.push_back(block);
     Logger::info("Blocks: %s", this->blocks.to_string().c_str());
     Logger::divider();
 
     /** Register the remaining free space as a free block. */
-    Block* free_block = this->mfb(ptr, size);
+    Block* free_block = this->mfb();
     free_blocks->push_back(free_block);
     return ptr;
 }
 
-Block* Region::mfb(void* ptr, usize user_data_size) {
-    usize aligned = ALIGN(user_data_size, 8);
-    Logger::info("Creating free block at offset: %zu", this->offset);
+Block* Region::mfb() {
+    usize aligned_offset = ALIGN(this->offset);
+    Logger::info("Creating free block at offset: %zu", aligned_offset);
 
     /**
      * Place the free Block header immediately after the user data using placement new.
@@ -131,7 +134,12 @@ Block* Region::mfb(void* ptr, usize user_data_size) {
      * 
      * Free block size equals remaining buffer space from current offset to end
      */
-    Block* block = new((unsigned char*)ptr + aligned) Block(true, this->size - this->offset, this, (unsigned char*)ptr + aligned + sizeof(Block));
+    Block* block = new(this->buffer + aligned_offset) Block(
+        true,                                         // block->is_free
+        this->size - aligned_offset,                  // block->size
+        this,                                         // block->region
+        this->buffer + aligned_offset + sizeof(Block) // block->user_data  **remainin free space**
+    );
     return block;
 }
 
