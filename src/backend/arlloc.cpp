@@ -90,7 +90,7 @@ void* Arlloc::find_free_block(usize size) {
                 /** Not enough remaining space for a new block, discard the leftover. */
                 //TODO: pop_at del bloque libre, no es un bloque valido porque es
                 //muy pequeño
-                printf("\x1B[32m[INFO]:\033[0m\t Leftover too small, discarded\n");
+                Logger::info("Leftover too small, discarded");
             } else {
                 this->free_blocks.push_back(tupla.value().second);
             }
@@ -101,7 +101,7 @@ void* Arlloc::find_free_block(usize size) {
 
     }
 
-    printf("\x1B[32m[INFO]:\033[0m\t Let's make new region...\n");
+    Logger::info("Let's make new region...");
     return nullptr;
 }
 
