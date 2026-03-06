@@ -21,13 +21,13 @@ private:
      * Total number of bytes available in the buffer.
      * Equals PAGE_SIZE - sizeof(Region).
      */
-    std::size_t size;
+    usize size;
 
     /**
      * Current position within the buffer.
      * Advances forward with each new block allocation.
      */
-    std::size_t offset;
+    usize offset;
 
     /**
      * List of all blocks allocated within this region.
@@ -51,7 +51,10 @@ private:
         size(PAGE_SIZE - sizeof(Region)),
         offset(0)
     {
-        printf("\x1B[32m[INFO]:\033[0m\t %s\n", this->to_string().c_str());
+        Logger::info("Calling Region constructor...");
+        Logger::info("Region* {\x1B[33m%p\033[0m}", (void*)this);
+        Logger::info(this->to_string().c_str());
+        Logger::divider();
     }
 
     /**
@@ -60,8 +63,7 @@ private:
      * The LinkedList destructor handles node cleanup automatically.
      */
     ~Region() {
-        printf("\x1B[32m[INFO]:\033[0m\t Destroying region { buffer: \x1B[33m%p\033[0m, size: %zu }\n",
-            (void*)this->buffer, this->size);
+        printf("Destroying Region { buffer: \x1B[33m%p\033[0m, size: %zu }", (void*)this->buffer, this->size);
         this->buffer = nullptr;
         this->size   = 0;
         this->offset = 0;
@@ -76,7 +78,7 @@ private:
      * @param size         Number of bytes requested by the user.
      * @return             Pointer to the usable memory, or nullptr if insufficient space.
      */
-    void* mnb(LinkedList<Block*>* free_blocks, std::size_t size);
+    void* mnb(LinkedList<Block*>* free_blocks, usize size);
 
     /**
      * Make free block (mfb).
@@ -87,7 +89,7 @@ private:
      * @param user_data_size  Size of the user data just allocated.
      * @return                Pointer to the new free Block.
      */
-    Block* mfb(void* ptr, std::size_t user_data_size);
+    Block* mfb(void* ptr, usize user_data_size);
 
 public:
 
@@ -126,7 +128,7 @@ public:
      *
      * @return  sizeof(Region).
      */
-    static std::size_t total_region_size();
+    static usize total_region_size();
 
     /**
      * Returns a string representation of the region for debugging.
@@ -143,7 +145,7 @@ public:
      * @param size         Number of bytes to allocate.
      * @return             Pointer to the usable memory.
      */
-    void* alloc(LinkedList<Block*>* free_blocks, std::size_t size);
+    void* alloc(LinkedList<Block*>* free_blocks, usize size);
 
     /**
      * Returns the current offset as a void pointer.
@@ -153,3 +155,6 @@ public:
      */
     void* wis_offset(void);
 };
+
+constexpr usize REGION_HEADER_SIZE = sizeof(Region);
+constexpr usize REGION_BUFFER_SIZE = PAGE_SIZE - sizeof(Region);

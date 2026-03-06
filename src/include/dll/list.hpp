@@ -43,7 +43,9 @@ public:
      * Destroys all nodes in the list.
      * `head` unique_ptr destroys the chain automatically from head to tail.
      */
-    ~LinkedList() = default;
+    ~LinkedList() {
+        printf("\x1B[32m[INFO]:\033[0m\t Calling List destructor \n");
+    };
 
     /**
      * Returns a reference to the number of nodes in the list.
@@ -298,4 +300,10 @@ public:
         return std::optional{this->tail};
     }
 
+    void clear() {
+        
+        while (!this->is_empty()) {
+            this->pop_front();
+        }
+    }
 };

@@ -26,7 +26,7 @@ private:
      * @param size  Number of bytes requested by the user.
      * @return      Pointer to the usable memory, or nullptr if not found.
      */
-    void* find_free_block(std::size_t size);
+    void* find_free_block(usize size);
 
 public:
 
@@ -34,20 +34,32 @@ public:
      * Constructs the allocator with empty region and free block lists.
      */
     Arlloc() {
-        printf("\x1B[32m[INFO]:\033[0m\t Calling Arlloc constructor\n");
+        Logger::info("Calling Arlloc constructor...");
     }
 
     /**
      * Destroys the allocator and releases all regions back to the OS via munmap.
      */
     ~Arlloc() {
+        Logger::info("Calling Arlloc destructor...");
+
+        /** Clear free_blocks first to avoid dangling pointers into mmap pages. */
+        this->free_blocks.clear();
+
         std::optional<Node<Region*>*> iter = this->regions.first();
         while (iter.has_value()) {
-            Region::drop(iter.value()->data);
-            iter = iter.value()->next.get();
+            Node<Region*>* current = iter.value();
+            iter = current->next.get();
+            Region::drop(current->data);
         }
-    }
 
+        /** Clear regions to release Node<Region*> heap memory cleanly.
+         *  Region::drop already released the mmap pages, so data pointers
+         *  inside each node are now dangling. clear() prevents ~LinkedList
+         *  from accessing them during automatic destruction.
+         */
+        this->regions.clear();
+    }
     /**
      * Allocates `size` bytes and returns a pointer to the usable memory.
      * First attempts to reuse a free block. If none is available, creates a new region.
@@ -55,7 +67,7 @@ public:
      * @param size  Number of bytes to allocate.
      * @return      Pointer to the allocated memory.
      */
-    void* alloc(std::size_t size);
+    void* alloc(usize size);
 
     /**
      * Marks the block at `ptr` as free and adds it to the free block list.
