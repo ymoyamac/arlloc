@@ -3,7 +3,6 @@
 #include "./allocator/block.hpp"
 
 Region* Region::init() {
-    printf("\x1B[32m[INFO]:\033[0m\t Making new Region...\n");
     printf("\x1B[32m[INFO]:\033[0m\t ===============================================================================================================\n");
     void* mem = mmap(NULL, PAGE_SIZE, PROT_RW, MAP_FLAGS, -1, 0);
     printf("\x1B[32m[INFO]:\033[0m\t Region* {\x1B[33m%p\033[0m}\n", mem);
@@ -15,6 +14,8 @@ Region* Region::init() {
 }
 
 void Region::drop(Region* region) {
+    printf("\x1B[32m[INFO]:\033[0m\t Calling Drop Region* {\x1B[33m%p\033[0m}\n", (void*)region);
+
     if (region == nullptr) {
         return;
     }
@@ -23,10 +24,17 @@ void Region::drop(Region* region) {
      * Manually call the destructor on each block before releasing the page.
      * Blocks live inside the mmap buffer, not on the heap, so delete cannot be used.
      */
-    std::optional<Node<Block*>*> iter = region->blocks.first();
-    while (iter.has_value()) {
-        iter.value()->data->~Block();
-        iter = iter.value()->next.get();
+    std::optional<Node<Block*>*> first = region->blocks.first();
+    if (!first.has_value()) {
+        return;
+    }
+    Node<Block*>* iterator = first.value();
+    printf("\x1B[32m[INFO]:\033[0m\t Get first Block of the Region* {\x1B[33m%p\033[0m}\n", (void*)iterator->data);
+
+    while (iterator != nullptr) {
+        printf("\x1B[32m[INFO]:\033[0m\t %s\n", iterator->data->to_string().c_str());
+        iterator = iterator->next.get();
+        region->blocks.pop_front();
     }
 
     /** Call Region destructor manually since it was constructed with placement new. */
@@ -34,6 +42,8 @@ void Region::drop(Region* region) {
 
     /** Release the entire mmap page back to the OS. */
     munmap(region, PAGE_SIZE);
+    printf("\x1B[32m[INFO]:\033[0m\t \x1B[32mReturning memory to the operating system with munmap\033[0m\n");
+    printf("\x1B[32m[INFO]:\033[0m\t ===============================================================================================================\n");
 }
 
 std::size_t Region::total_region_size() {
@@ -76,8 +86,7 @@ void* Region::alloc(LinkedList<Block*>* free_blocks, std::size_t size) {
 }
 
 void* Region::mnb(LinkedList<Block*>* free_blocks, std::size_t size) {
-    printf("\x1B[32m[INFO]:\033[0m\t Making new block...\n");
-    if (size == 0) {
+        if (size == 0) {
         return nullptr;
     }
 
@@ -111,8 +120,6 @@ void* Region::mnb(LinkedList<Block*>* free_blocks, std::size_t size) {
     block->user_data = ptr;
 
     printf("\x1B[32m[INFO]:\033[0m\t %s\n", block->to_string().c_str());
-    printf("\x1B[32m[INFO]:\033[0m\t Block size: %zu bytes\n", sizeof(Block));
-    printf("\x1B[32m[INFO]:\033[0m\t User data* {\x1B[33m%p\033[0m}\n", ptr);
 
     /**
      * Advance the offset past the Block header and user data.

@@ -4,7 +4,6 @@ void* Arlloc::find_free_block(std::size_t size) {
     printf("\x1B[32m[INFO]:\033[0m\t Looking for a free block...\n");
     /** First allocation: no regions exist yet. */
     if (this->regions.is_empty() && this->free_blocks.is_empty()) {
-        printf("\x1B[32m[INFO]:\033[0m\t BUFFER_SIZE: %llu bytes\n", BUFFER_SIZE);
         printf("\x1B[32m[INFO]:\033[0m\t the memory requested by the user \x1B[96m\"%zu bytes\"\033[0m, buffer: \x1B[96m\"%llu bytes\"\033[0m\n", size, BUFFER_SIZE);
         return nullptr;
     }
@@ -81,6 +80,7 @@ void* Arlloc::find_free_block(std::size_t size) {
              *  | !is_free | size bytes | is_free  |                    |
              *  +----------+------------+----------+--------------------+
              */
+            //TODO: Arreglar la libreración de memoria
             std::optional<std::pair<Block*, Block*>> tupla = Block::split(iter->data, size);
             if (tupla == std::nullopt) {
                 printf("\x1B[91m[ERROR]:\033[0m\t Block split failed\n");
@@ -117,6 +117,8 @@ void* Arlloc::alloc(std::size_t size) {
 }
 
 void Arlloc::dealloc(void* ptr) {
+    printf("\x1B[32m[INFO]:\033[0m\t ");
+    
     //TODO: Agregar merge blocking, si un bloque queda libre a lado de otro
     //se juntan para hacer un bloque solo con la suma de ambos espacios libres
     //y se agrega a la lista de bloques libres
@@ -134,10 +136,11 @@ void Arlloc::dealloc(void* ptr) {
      *  block       ptr
      */
     Block* block = (Block*)((unsigned char*)ptr - sizeof(Block));
-    block->is_free = true;
+    block->is_free   = true;
     block->user_data = nullptr;
     this->free_blocks.push_back(block);
 
     printf("\x1B[32m[INFO]:\033[0m\t Deallocated block at \x1B[33m%p\033[0m, size: %zu bytes\n",
         (void*)block, block->size);
+    printf("\x1B[32m[INFO]:\033[0m\t ===============================================================================================================\n");
 }

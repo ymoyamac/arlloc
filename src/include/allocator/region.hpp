@@ -60,7 +60,7 @@ private:
      * The LinkedList destructor handles node cleanup automatically.
      */
     ~Region() {
-        printf("\x1B[32m[INFO]:\033[0m\t Destroying region { buffer: \x1B[33m%p\033[0m, size: %zu }\n",
+        printf("\x1B[32m[INFO]:\033[0m\t Destroying Region { buffer: \x1B[33m%p\033[0m, size: %zu }\n",
             (void*)this->buffer, this->size);
         this->buffer = nullptr;
         this->size   = 0;

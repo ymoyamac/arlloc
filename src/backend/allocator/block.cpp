@@ -18,8 +18,7 @@ std::string Block::to_string(void) {
 }
 
 std::optional<std::pair<Block*, Block*>> Block::split(Block* free, std::size_t size) {
-    printf("\x1B[32m[INFO]:\033[0m\t ===============================================================================================================\n");
-    printf("\x1B[32m[INFO]:\033[0m\t Block Spliting\n");
+    printf("\x1B[32m[INFO]:\033[0m\t Block Spliting...\n");
 
     /// Mark the free block as used and set its size to exactly what was requested.
     ///
@@ -35,6 +34,7 @@ std::optional<std::pair<Block*, Block*>> Block::split(Block* free, std::size_t s
     ///  | (header) | size bytes | (header) |                    |
     ///  +----------+------------+----------+--------------------+
 
+    printf("\x1B[32m[INFO]:\033[0m\t Creating a new block from the free block...\n");
     printf("\x1B[32m[INFO]:\033[0m\t Block* {\x1B[33m%p\033[0m}\n", (void*)free);
     std::size_t original_size = free->size;
     free->is_free   = false;
@@ -42,8 +42,7 @@ std::optional<std::pair<Block*, Block*>> Block::split(Block* free, std::size_t s
     free->user_data = (unsigned char*)free + sizeof(Block);
 
     printf("\x1B[32m[INFO]:\033[0m\t %s\n", free->to_string().c_str());
-    printf("\x1B[32m[INFO]:\033[0m\t Block size: %zu bytes\n", free->size);
-    printf("\x1B[32m[INFO]:\033[0m\t User data* {\x1B[33m%p\033[0m}\n", free->user_data);
+    printf("\x1B[32m[INFO]:\033[0m\t ===============================================================================================================\n");
 
     std::pair<Block*, Block*> tupla;
     tupla.first = free;
@@ -63,6 +62,7 @@ std::optional<std::pair<Block*, Block*>> Block::split(Block* free, std::size_t s
         printf("\x1B[32m[INFO]:\033[0m\t Free New %s\n", remaining->to_string().c_str());
         printf("\x1B[32m[INFO]:\033[0m\t Free block size: %zu bytes\n", remaining->size);
         tupla.second = remaining;
+        printf("\x1B[32m[INFO]:\033[0m\t ===============================================================================================================\n");
         return std::optional{tupla};
     }
 

@@ -41,6 +41,8 @@ public:
      * Destroys the allocator and releases all regions back to the OS via munmap.
      */
     ~Arlloc() {
+        printf("\x1B[32m[INFO]:\033[0m\t Calling Arlloc destructor...\n");
+
         /** Clear free_blocks first to avoid dangling pointers into mmap pages. */
         this->free_blocks.clear();
 
