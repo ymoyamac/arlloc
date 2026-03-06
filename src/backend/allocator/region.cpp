@@ -24,29 +24,14 @@ void Region::drop(Region* region) {
         return;
     }
 
-    /**
-     * Manually call the destructor on each block before releasing the page.
-     * Blocks live inside the mmap buffer, not on the heap, so delete cannot be used.
-     */
-    std::optional<Node<Block*>*> first = region->blocks.first();
-    if (!first.has_value()) {
-        return;
-    }
-    Node<Block*>* iterator = first.value();
-    Logger::info("First Block of the Region* {\x1B[33m%p\033[0m}", (void*)iterator->data);
-
-    while (iterator != nullptr) {
-        Logger::info(iterator->data->to_string().c_str());
-        iterator = iterator->next.get();
-        region->blocks.pop_front();
-    }
+    region->blocks.clear();
 
     /** Call Region destructor manually since it was constructed with placement new. */
     region->~Region();
 
     /** Release the entire mmap page back to the OS. */
     munmap(region, PAGE_SIZE);
-    Logger::info("Returning memory to the operating system with munmap");
+    Logger::info("Returning memory to the operating system with \x1B[31mmunmap\033[0m");
     Logger::divider();
 }
 

@@ -117,6 +117,8 @@ void* Arlloc::alloc(usize size) {
 }
 
 void Arlloc::dealloc(void* ptr) {
+
+    //TODO: Llammar a munmap cuando todos los bloque esten libres de una region
     
     //TODO: Agregar merge blocking, si un bloque queda libre a lado de otro
     //se juntan para hacer un bloque solo con la suma de ambos espacios libres

@@ -44,7 +44,7 @@ public:
      * `head` unique_ptr destroys the chain automatically from head to tail.
      */
     ~LinkedList() {
-        printf("\x1B[32m[INFO]:\033[0m\t Calling List destructor \n");
+        Logger::info("Calling List destructor...");
     };
 
     /**
