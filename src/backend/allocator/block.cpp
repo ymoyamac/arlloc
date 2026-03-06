@@ -1,7 +1,7 @@
 #include "./allocator/block.hpp"
 #include "./allocator/region.hpp"
 
-std::size_t Block::total_block_size() {
+usize Block::total_block_size() {
     return sizeof(Block);
 }
 
@@ -17,8 +17,8 @@ std::string Block::to_string(void) {
     return oss.str();
 }
 
-std::optional<std::pair<Block*, Block*>> Block::split(Block* free, std::size_t size) {
-    printf("\x1B[32m[INFO]:\033[0m\t Block Spliting...\n");
+std::optional<std::pair<Block*, Block*>> Block::split(Block* free, usize size) {
+    Logger::info("Block Spliting...");
 
     /// Mark the free block as used and set its size to exactly what was requested.
     ///
@@ -36,7 +36,7 @@ std::optional<std::pair<Block*, Block*>> Block::split(Block* free, std::size_t s
 
     printf("\x1B[32m[INFO]:\033[0m\t Creating a new block from the free block...\n");
     printf("\x1B[32m[INFO]:\033[0m\t Block* {\x1B[33m%p\033[0m}\n", (void*)free);
-    std::size_t original_size = free->size;
+    usize original_size = free->size;
     free->is_free   = false;
     free->size      = size;
     free->user_data = (unsigned char*)free + sizeof(Block);

@@ -25,12 +25,12 @@ int main() {
         printf("CharsAdrr: \x1B[33m%p\033[0m, Value: %c\n", chars + i, chars[i]);
     }
 
-    /** Second allocation reuses the free block from the first region via block splitting. */
+    /** Second allocation reuses the free block from the first region via block splitting. 
     int* num = (int*)arlloc.alloc(sizeof(int) * 10);
     *num = 10;
     printf("Num: %d\n", *num);
 
-    /** Deallocate the char buffer, marking it as free for future allocations. */
+     Deallocate the char buffer, marking it as free for future allocations. */
     arlloc.dealloc(chars);
 
     return 0;

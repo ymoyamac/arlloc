@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <sstream>
+#include "lib.hpp"
 #include "../dll/node.hpp"
 
 class Region;
@@ -22,7 +23,7 @@ public:
      *  *block                 *user_data
      */
     bool        is_free;
-    std::size_t size;
+    usize       size;
     Region*     region;
     void*       user_data;
 
@@ -31,7 +32,19 @@ public:
      * Intended to be used with placement new inside a Region buffer.
      */
     Block() : is_free(true), size(0), region(nullptr), user_data(nullptr) {
-        printf("\x1B[32m[INFO]:\033[0m\t Calling block constructor\n");
+        Logger::info("Calling block constructor");
+        Logger::info("Block* {\x1B[33m%p\033[0m}", (void*)this);
+        Logger::info(this->to_string().c_str());
+        Logger::divider();
+    }
+
+    Block(bool is_free, size_t size, Region* region, void* user_data)
+        : is_free(is_free), size(size), region(region), user_data(user_data)
+    {
+        Logger::info("Calling block constructor args...");
+        Logger::info("Region* {\x1B[33m%p\033[0m}", (void*)this);
+        Logger::info(this->to_string().c_str());
+        Logger::divider();
     }
 
     /**
@@ -39,8 +52,7 @@ public:
      * Does not free any memory — the Region buffer is released by munmap.
      */
     ~Block() {
-        printf("\x1B[32m[INFO]:\033[0m\t Calling block destructor { size: %zu, region: \x1B[33m%p\033[0m }\n",
-            this->size, (void*)this->region);
+        Logger::info("Calling block destructor { size: %zu, region: \x1B[33m%p\033[0m }",this->size, (void*)this->region);
         this->region    = nullptr;
         this->user_data = nullptr;
     }
@@ -50,7 +62,7 @@ public:
      *
      * @return  sizeof(Block).
      */
-    std::size_t total_block_size(void);
+    usize total_block_size(void);
 
     /**
      * Returns a string representation of the block for debugging.
@@ -64,7 +76,9 @@ public:
      * Split one free block to get new block where the user will writes
      * his data and new next free_block
      */
-    static std::optional<std::pair<Block*, Block*>> split(Block* free_block, std::size_t size);
+    static std::optional<std::pair<Block*, Block*>> split(Block* free_block, usize size);
 
-    //static void* mnb(LinkedList<Block*>* free_blocks, std::size_t size);
+    //static void* mnb(LinkedList<Block*>* free_blocks, usize size);
 };
+
+constexpr usize BLOCK_HEADER_SIZE  = sizeof(Block);

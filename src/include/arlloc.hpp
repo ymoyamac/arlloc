@@ -26,7 +26,7 @@ private:
      * @param size  Number of bytes requested by the user.
      * @return      Pointer to the usable memory, or nullptr if not found.
      */
-    void* find_free_block(std::size_t size);
+    void* find_free_block(usize size);
 
 public:
 
@@ -34,14 +34,14 @@ public:
      * Constructs the allocator with empty region and free block lists.
      */
     Arlloc() {
-        printf("\x1B[32m[INFO]:\033[0m\t Calling Arlloc constructor\n");
+        Logger::info("Calling Arlloc constructor...");
     }
 
     /**
      * Destroys the allocator and releases all regions back to the OS via munmap.
      */
     ~Arlloc() {
-        printf("\x1B[32m[INFO]:\033[0m\t Calling Arlloc destructor...\n");
+        Logger::info("Calling Arlloc destructor...");
 
         /** Clear free_blocks first to avoid dangling pointers into mmap pages. */
         this->free_blocks.clear();
@@ -67,7 +67,7 @@ public:
      * @param size  Number of bytes to allocate.
      * @return      Pointer to the allocated memory.
      */
-    void* alloc(std::size_t size);
+    void* alloc(usize size);
 
     /**
      * Marks the block at `ptr` as free and adds it to the free block list.
