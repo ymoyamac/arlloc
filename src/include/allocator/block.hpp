@@ -2,8 +2,10 @@
 
 #include <iostream>
 #include <sstream>
+#include <unordered_map>
 #include "lib.hpp"
 #include "../dll/node.hpp"
+#include "../dll/list.hpp"
 
 class Region;
 
@@ -78,7 +80,12 @@ public:
      */
     static std::optional<std::pair<Block*, Block*>> split(Block* free_block, usize size);
 
-    //static void* mnb(LinkedList<Block*>* free_blocks, usize size);
+    /**
+     * Physically combines two adjacent free blocks
+     * 
+     * @return  The new free_block
+     */
+    static std::optional<Block*> merge(LinkedList<Block*>& free_blocks, Block* block_ptr);
 };
 
-constexpr usize BLOCK_HEADER_SIZE  = sizeof(Block);
+constexpr usize BLOCK_HEADER_SIZE = sizeof(Block);

@@ -7,19 +7,19 @@ Region* Region::init() {
     if (mem == MAP_FAILED) {
         throw std::runtime_error("mmap failed");
     }
-    Logger::info("mmap* {\x1B[33m%p\033[0m}", mem);
-    Logger::info("ALIGNMENT: \x1B[96m\"%d bytes\"\033[0m", ALIGNMENT);
-    Logger::info("PAGE_SIZE: \x1B[96m\"%d bytes\"\033[0m", PAGE_SIZE);
+    Logger::info("mmap*               \x1B[33m%p\033[0m", mem);
+    Logger::info("ALIGNMENT:          \x1B[96m\"%d bytes\"\033[0m", ALIGNMENT);
+    Logger::info("PAGE_SIZE:          \x1B[96m\"%d bytes\"\033[0m", PAGE_SIZE);
     Logger::info("REGION_HEADER_SIZE: \x1B[96m\"%d bytes\"\033[0m", REGION_HEADER_SIZE);
     Logger::info("REGION_BUFFER_SIZE: \x1B[96m\"%d bytes\"\033[0m", REGION_BUFFER_SIZE);
-    Logger::info("BLOCK_HEADER_SIZE: \x1B[96m\"%d bytes\"\033[0m", BLOCK_HEADER_SIZE);
+    Logger::info("BLOCK_HEADER_SIZE:  \x1B[96m\"%d bytes\"\033[0m", BLOCK_HEADER_SIZE);
     Logger::divider();
     /** Construct Region in-place at the start of the mmap page using placement new. */
     return new(mem) Region();
 }
 
 void Region::drop(Region* region) {
-    Logger::info("Calling Drop Region* {\x1B[33m%p\033[0m}", (void*)region);
+    Logger::info("Calling Drop Region* { \x1B[33m%p\033[0m }", (void*)region);
 
     if (region == nullptr) {
         return;
@@ -89,7 +89,7 @@ void* Region::mnb(LinkedList<Block*>* free_blocks, usize size) {
         false,                                                          // block->is_free
         aligned_size,                                                   // block->size
         this,                                                           // block->region
-        (unsigned char*)(this->buffer + aligned_offset) + sizeof(Block) //block->user_data
+        (unsigned char*)(this->buffer + aligned_offset) + sizeof(Block) // block->user_data
     );
 
     /** User data starts immediately after the Block header. */
@@ -110,7 +110,7 @@ void* Region::mnb(LinkedList<Block*>* free_blocks, usize size) {
 
     this->blocks.push_back(block);
 
-    Logger::info("Region Owner* { \x1B[33m%p\033[0m }", (void*)this);
+    Logger::info("Region that owns the Block: Region* { \x1B[33m%p\033[0m }", (void*)this);
     Logger::info("Blocks: %s", this->blocks.to_string().c_str());
     Logger::divider();
 
@@ -124,7 +124,7 @@ void* Region::mnb(LinkedList<Block*>* free_blocks, usize size) {
 
 Block* Region::mfb() {
     usize aligned_offset = ALIGN(this->offset);
-    Logger::info("Creating free block at offset: %zu", aligned_offset);
+    Logger::info("Making free block at offset: %zu", aligned_offset);
 
     /**
      * Place the free Block header immediately after the user data using placement new.
