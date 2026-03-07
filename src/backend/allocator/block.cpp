@@ -34,13 +34,17 @@ std::optional<std::pair<Block*, Block*>> Block::split(Block* free, usize size) {
     ///  |  Block   | user data  |  Block   |  remaining bytes   |
     ///  | (header) | size bytes | (header) |                    |
     ///  +----------+------------+----------+--------------------+
+    ///  ^                       ^
+    ///  first                   second
 
     Logger::info("Creating a new block from the free block...");
     usize original_size = free->size;
     free->is_free   = false;
     free->size      = aligned_size;
     free->user_data = (unsigned char*)free + sizeof(Block);
-    Logger::info(free->to_string().c_str());
+    Logger::info("Pair::First");
+    Logger::info("Block* { \x1B[33m%p\033[0m }", (void*)free);
+    Logger::info("%s", free->to_string().c_str());
 
     std::pair<Block*, Block*> tupla;
     tupla.first = free;
@@ -50,6 +54,7 @@ std::optional<std::pair<Block*, Block*>> Block::split(Block* free, usize size) {
      * to hold a Block header plus at least one byte, create a new free block.
      * Otherwise discard the leftover to avoid unusable fragments.
      */
+    Logger::info("Pair::Second");
     if ((original_size - sizeof(Block) - aligned_size) > (sizeof(Block) + MINIMUM_SIZE)) {
         Block* remaining = new((unsigned char*)free->user_data + aligned_size) Block(
             true,                                           //block->is_free
@@ -61,7 +66,6 @@ std::optional<std::pair<Block*, Block*>> Block::split(Block* free, usize size) {
         return std::optional{tupla};
     }
 
-    Logger::info("There is sufficient space to create a block with the minimum size: 32 bytes + 4 bytes = 36 bytes");
     tupla.second = nullptr;
     Logger::divider();
     return std::optional{tupla};

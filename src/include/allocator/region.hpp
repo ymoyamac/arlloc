@@ -52,7 +52,7 @@ private:
         offset(0)
     {
         Logger::info("Calling Region constructor...");
-        Logger::info("Region* {\x1B[33m%p\033[0m}", (void*)this);
+        Logger::info("Region* { \x1B[33m%p\033[0m }", (void*)this);
         Logger::info(this->to_string().c_str());
         Logger::divider();
     }
@@ -154,6 +154,8 @@ public:
      * @return  Current offset cast to void*.
      */
     void* wis_offset(void);
+
+    LinkedList<Block*>* get_blocks(void);
 };
 
 constexpr usize REGION_HEADER_SIZE = sizeof(Region);

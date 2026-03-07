@@ -26,7 +26,7 @@ private:
      * @param size  Number of bytes requested by the user.
      * @return      Pointer to the usable memory, or nullptr if not found.
      */
-    void* find_free_block(usize size);
+    std::optional<Block*> find_free_block(usize size);
 
 public:
 

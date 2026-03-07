@@ -109,12 +109,16 @@ void* Region::mnb(LinkedList<Block*>* free_blocks, usize size) {
     this->offset = aligned_offset + sizeof(Block) + aligned_size;
 
     this->blocks.push_back(block);
+
+    Logger::info("Region Owner* { \x1B[33m%p\033[0m }", (void*)this);
     Logger::info("Blocks: %s", this->blocks.to_string().c_str());
     Logger::divider();
 
     /** Register the remaining free space as a free block. */
     Block* free_block = this->mfb();
     free_blocks->push_back(free_block);
+    Logger::info("Free Blocks: %s", free_blocks->to_string().c_str());
+    Logger::divider();
     return ptr;
 }
 
@@ -141,6 +145,10 @@ Block* Region::mfb() {
         this->buffer + aligned_offset + sizeof(Block) // block->user_data  **remainin free space**
     );
     return block;
+}
+
+LinkedList<Block*>* Region::get_blocks() {
+    return &this->blocks;
 }
 
 void* Region::wis_offset(void) {
