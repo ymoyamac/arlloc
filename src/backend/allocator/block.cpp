@@ -76,71 +76,154 @@ std::optional<std::pair<Block*, Block*>> Block::split(Block* free, usize size) {
 std::optional<Block*> Block::merge(LinkedList<Block*>& free_blocks, Block* block_ptr) {
 
     Logger::info("Block Merging...");
-    if (free_blocks.is_empty() || free_blocks.get_size() == 1) {
-        /** There are no blocks to merge */
+
+    if (free_blocks.is_empty()) {
         return std::nullopt;
     }
 
     /**
-     *  Merge:
-     *  +----------+------------+----------+----------------------+
-     *  |  Block   | free_block |  Block   |    free_block        |
-     *  | (header) |  40 bytes  | (header) |     80 bytes         |
-     *  +----------+------------+----------+----------------------+
-     *  ^                       ^
-     *  first                   second 
-     * 
-     *  Merge:
-     *  +----------+----------------------------------------------+
-     *  |  Block   |                free_block                    |
-     *  | (header) |                 120 bytes                    |
-     *  +----------+----------------------------------------------+
-     *  ^
-     *  *free_block 
-     * 
-     * The only restriction that the merge blocking algorithm may have is that
-     * the free blocks to be combined must be physically next to each other.
-     * Otherwise, it will not be possible to combine.
-     * 
-     * Both must belong to the same region. Otherwise, it will not be possible
-     * to combine.
+     * Build a map with two keys per free block: start address and end address.
+     * This allows O(1) lookup in both directions (forward and backward).
+     *
+     * start → Block*  (to find if block_ptr's end matches a free block's start)
+     * end   → Block*  (to find if block_ptr's start matches a free block's end)
+     *
+     *  +----------+----------+          +----------+----------+
+     *  |  Block   | userdata |          |  Block   | userdata |
+     *  | (header) |          |          | (header) |          |
+     *  +----------+----------+          +----------+----------+
+     *  ^                     ^          ^                     ^
+     *  start                 end        start                 end
      */
-    
     Node<Block*>* iter = free_blocks.first().value();
-    std::unordered_map<void*, usize> umap;
+    std::unordered_map<void*, Block*> umap;
 
     while (iter != nullptr) {
-        umap.insert({(unsigned char*)iter->data, BLOCK_HEADER_SIZE + iter->data->size});
+        Block* b  = iter->data;
+        void* start = (void*)b;
+        void* end   = (unsigned char*)b + sizeof(Block) + b->size;
+        umap.insert({start, b});
+        umap.insert({end,   b});
         iter = iter->next.get();
     }
+
     Logger::info("Block to deallocated block { \x1B[33m%p\033[0m }", (void*)block_ptr);
     Logger::info("free blocks {");
-    auto print_key_value = [](const auto& key, const auto& value)
-    {
-        Logger::info("  {\"%p\", \"%d\"}", key, value);
-    };
-
-    for (const std::pair<const void*, usize>& n : umap) {
-        print_key_value(n.first, n.second);
+    for (const auto& [key, value] : umap) {
+        Logger::info("  { \"%p\" -> \"%p\" }", key, (void*)value);
     }
     Logger::info("}");
 
-    void* rhs = (unsigned char*)block_ptr + sizeof(Block) + block_ptr->size;
-    Logger::info("rhs { \x1B[33m%p\033[0m }", rhs);
-    
-    if (umap.contains(rhs)) {
-        Logger::info("Can merge blocks...");
-        Block* new_free_block = new(rhs) Block(
-            true,                           // block->is_free
-            umap.at(rhs) + sizeof(Block) + block_ptr->size, // block->size
-            block_ptr->region,              // block->region
-            nullptr                         // block->user_data
-        );
-        free_blocks.push_back(new_free_block);
-        return std::optional{new_free_block};
+    /**
+     * rhs_addr: address immediately after block_ptr's user data.
+     *           If a free block starts here, we can merge forward.
+     *
+     *  block_ptr              rhs_addr
+     *  +----------+----------+----------+----------+
+     *  |  block   | userdata |  rhs     | userdata |
+     *  | (header) |          | (header) |          |
+     *  +----------+----------+----------+----------+
+     *
+     * lhs_addr: address of block_ptr itself.
+     *           If a free block ends here, we can merge backward.
+     *
+     *  lhs_addr (== block_ptr)
+     *  +----------+----------+----------+----------+
+     *  |  lhs     | userdata |  block   | userdata |
+     *  | (header) |          | (header) |          |
+     *  +----------+----------+----------+----------+
+     */
+    void* rhs_addr = (unsigned char*)block_ptr + sizeof(Block) + block_ptr->size;
+    void* lhs_addr = (void*)block_ptr;
+
+    Block* rhs = umap.contains(rhs_addr) ? umap.at(rhs_addr) : nullptr;
+    Block* lhs = umap.contains(lhs_addr) ? umap.at(lhs_addr) : nullptr;
+
+    // Ensure adjacent blocks belong to the same region to avoid cross-region corruption
+    if (rhs != nullptr && rhs->region != block_ptr->region) rhs = nullptr;
+    if (lhs != nullptr && lhs->region != block_ptr->region) lhs = nullptr;
+
+    if (rhs != nullptr && lhs != nullptr) {
+        /**
+         * Both sides are free — merge all three into lhs.
+         *
+         *  Before:
+         *  +----------+----------+----------+----------+----------+----------+
+         *  |  lhs     | lhs data |  block   | blk data |  rhs     | rhs data |
+         *  | (header) |          | (header) |          | (header) |          |
+         *  +----------+----------+----------+----------+----------+----------+
+         *
+         *  After:
+         *  +----------+--------------------------------------------------+
+         *  |  lhs     |             merged free space                    |
+         *  | (header) |                                                  |
+         *  +----------+--------------------------------------------------+
+         *
+         *  new_size = lhs_header + lhs_data + block_header + block_data + rhs_header + rhs_data
+         */
+        Logger::info("Merging both sides (lhs + block + rhs)...");
+        usize new_size = lhs->size + sizeof(Block) + block_ptr->size + sizeof(Block) + rhs->size;
+        lhs->size    = new_size;
+        lhs->is_free = true;
+        free_blocks.pop_at(rhs);
+        free_blocks.pop_at(lhs);
+        return std::optional{lhs};
     }
 
+    if (rhs != nullptr) {
+        /**
+         * Only forward neighbor is free — merge block_ptr with rhs.
+         *
+         *  Before:
+         *  +----------+----------+----------+----------+
+         *  |  block   | blk data |  rhs     | rhs data |
+         *  | (header) |          | (header) |          |
+         *  +----------+----------+----------+----------+
+         *
+         *  After:
+         *  +----------+------------------------------+
+         *  |  block   |       merged free space      |
+         *  | (header) |                              |
+         *  +----------+------------------------------+
+         *
+         *  new_size = block_data + rhs_header + rhs_data
+         */
+        Logger::info("Merging forward (block + rhs)...");
+        usize new_size = block_ptr->size + sizeof(Block) + rhs->size;
+        block_ptr->size    = new_size;
+        block_ptr->is_free = true;
+        free_blocks.pop_at(rhs);
+        return std::optional{block_ptr};
+    }
 
+    if (lhs != nullptr) {
+        /**
+         * Only backward neighbor is free — merge lhs with block_ptr.
+         *
+         *  Before:
+         *  +----------+----------+----------+----------+
+         *  |  lhs     | lhs data |  block   | blk data |
+         *  | (header) |          | (header) |          |
+         *  +----------+----------+----------+----------+
+         *
+         *  After:
+         *  +----------+------------------------------+
+         *  |  lhs     |       merged free space      |
+         *  | (header) |                              |
+         *  +----------+------------------------------+
+         *
+         *  new_size = lhs_data + block_header + block_data
+         */
+        Logger::info("Merging backward (lhs + block)...");
+        usize new_size = sizeof(Block) + lhs->size + sizeof(Block) + block_ptr->size;
+        lhs->size    = new_size;
+        lhs->is_free = true;
+        free_blocks.pop_at(lhs);
+        return std::optional{lhs};
+    }
+
+    /** No adjacent free blocks found — block_ptr will be added as standalone. */
+    Logger::info("No adjacent free blocks found, adding as standalone...");
     return std::nullopt;
 }
 

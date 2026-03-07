@@ -24,8 +24,8 @@ int main() {
     printf("Dealloc num 2\n");
     arlloc.dealloc(num2);
 
-    //arlloc.dealloc(num);
-    //arlloc.dealloc(num4);
+    arlloc.dealloc(num);
+    arlloc.dealloc(num4);
 
     return 0;
 }

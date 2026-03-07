@@ -150,6 +150,8 @@ void Arlloc::dealloc(void* ptr) {
 
     std::optional<Block*> merged = Block::merge(this->free_blocks, block);
     if (merged.has_value()) {
+        Logger::info("Merged block { \x1B[33m%p\033[0m, size: \x1B[96m\"%zu bytes\"\033[0m }",
+            (void*)merged.value(), merged.value()->size);
         this->free_blocks.push_back(merged.value());
     } else {
         this->free_blocks.push_back(block);
