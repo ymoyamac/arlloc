@@ -28,11 +28,28 @@ int main() {
     /** Second allocation reuses the free block from the first region via block splitting. */
     int* num = (int*)arlloc.alloc(sizeof(int) * 10);
     *num = 10;
-    printf("Num: %d\n", *num);
+    printf("Num 1: %d\n", *num);
+
+    int* num2 = (int*)arlloc.alloc(3888);
+    *num2 = 99;
+    printf("Num 2: %d\n", *num2);
+
+    printf("Dealloc Num 1...\n");
+    arlloc.dealloc(num);
+
+    int* num3 = (int*)arlloc.alloc(sizeof(int) * 10);
+    *num3 = 101;
+    printf("Num 3: %d\n", *num);
+
+    int* num4 = (int*)arlloc.alloc(sizeof(int) * 10);
+    *num4 = 10;
+    printf("Num 4: %d\n", *num4);
 
     /** Deallocate the char buffer, marking it as free for future allocations. */
     arlloc.dealloc(chars);
-    arlloc.dealloc(num);
+    arlloc.dealloc(num2);
+    arlloc.dealloc(num3);
+    arlloc.dealloc(num4);
 
     return 0;
 }

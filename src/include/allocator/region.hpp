@@ -154,6 +154,8 @@ public:
      * @return  Current offset cast to void*.
      */
     void* wis_offset(void);
+
+    LinkedList<Block*>* get_blocks(void);
 };
 
 constexpr usize REGION_HEADER_SIZE = sizeof(Region);

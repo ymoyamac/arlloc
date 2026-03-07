@@ -52,7 +52,7 @@ public:
      *
      * @return  Reference to the size of the list.
      */
-    usize& get_size() {
+    usize& get_size(void) {
         return this->size;
     }
 
@@ -157,7 +157,7 @@ public:
      *
      * @return  The data of the removed node, or `std::nullopt` if empty.
      */
-    std::optional<T> pop_back() {
+    std::optional<T> pop_back(void) {
         if (this->tail == nullptr) {
             return {};
         }
@@ -197,7 +197,7 @@ public:
      *
      * @return  The data of the removed node, or `std::nullopt` if empty.
      */
-    std::optional<T> pop_front() {
+    std::optional<T> pop_front(void) {
         if (this->head == nullptr) {
             return {};
         }
@@ -239,7 +239,7 @@ public:
      *
      * @return  A string in the format "List { 1, 2, 3 }".
      */
-    std::string to_string() const {
+    std::string to_string(void) const {
         std::ostringstream oss;
         oss << "List { ";
         /** Traverses the list from head to tail using raw pointers. */
@@ -259,7 +259,7 @@ public:
      * Prints the list to stdout using `to_string()`.
      * Output example: List { 1, 2, 3 }
      */
-    void print() const {
+    void print(void) const {
         std::cout << this->to_string() << std::endl;
     }
 
@@ -300,9 +300,44 @@ public:
         return std::optional{this->tail};
     }
 
-    void clear() {
+    void clear(void) {
         while (!this->is_empty()) {
             this->pop_front();
         }
+    }
+
+    std::optional<T> pop_at(T item) {
+        if (this->head == nullptr) {
+            return std::nullopt;
+        }
+
+        Node<T>* iter = this->head.get();
+        while (iter != nullptr) {
+            if (iter->data == item) {
+                break;
+            }
+            iter = iter->next.get();
+        }
+
+        if (iter == nullptr) {
+            return std::nullopt;
+        }
+
+        T data = iter->data;
+        if (iter->prev == nullptr && iter->next == nullptr) {
+            this->head = nullptr;
+            this->tail = nullptr;
+        } else if (iter->prev == nullptr) {
+            this->head = std::move(iter->next);
+            this->head->prev = nullptr;
+        } else if (iter->next == nullptr) {
+            this->tail = iter->prev;
+            this->tail->next = nullptr;
+        } else {
+            iter->next->prev = iter->prev;
+            iter->prev->next = std::move(iter->next);
+        }
+        this->size--;
+        return std::optional{data};
     }
 };
