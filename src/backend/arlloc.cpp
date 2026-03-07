@@ -101,8 +101,6 @@ std::optional<Block*> Arlloc::find_free_block(usize size) {
             }
             return std::optional{tupla.value().first};
         }
-
-
     }
 
     Logger::info("Let's make new region...");
@@ -130,10 +128,9 @@ void Arlloc::dealloc(void* ptr) {
 
     //TODO: Llammar a munmap cuando todos los bloque esten libres de una region
     
-    //TODO: Agregar merge blocking, si un bloque queda libre a lado de otro
-    //se juntan para hacer un bloque solo con la suma de ambos espacios libres
-    //y se agrega a la lista de bloques libres
     if (ptr == nullptr) return;
+    Logger::info("Arlloc::dealloc");
+    Logger::info("Available free blocks: %s", this->free_blocks.to_string().c_str());
 
     /**
      * Recover the Block header by stepping back sizeof(Block) bytes from the user pointer.
@@ -150,8 +147,15 @@ void Arlloc::dealloc(void* ptr) {
     block->is_free   = true;
     block->user_data = nullptr;
     block->region->get_blocks()->pop_at(block);
-    this->free_blocks.push_back(block);
 
-    Logger::info("Deallocated block at \x1B[33m%p\033[0m, size: %zu bytes", (void*)block, block->size);
+    std::optional<Block*> merged = Block::merge(this->free_blocks, block);
+    if (merged.has_value()) {
+        this->free_blocks.push_back(merged.value());
+    } else {
+        this->free_blocks.push_back(block);
+    }
+
+    Logger::info("Free %s", this->free_blocks.to_string().c_str());
+    Logger::info("Deallocated block at \x1B[33m%p\033[0m, size: \x1B[96m\"%zu bytes\"\033[0m", (void*)block, block->size);
     Logger::divider();
 }
