@@ -144,6 +144,12 @@ void Arlloc::dealloc(void* ptr) {
      *  block       ptr
      */
     Block* block = (Block*)((unsigned char*)ptr - sizeof(Block));
+
+    if (block->is_free) {
+        Logger::error("Double free detected at \x1B[33m%p\033[0m", (void*)block);
+        return;
+    }
+
     block->is_free   = true;
     block->user_data = nullptr;
     block->region->get_blocks()->pop_at(block);
